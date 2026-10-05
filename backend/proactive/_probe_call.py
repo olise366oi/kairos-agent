@@ -4,7 +4,7 @@ sys.path.insert(0, r"YOUR_PATH\backend\proactive")
 sys.path.insert(0, r"YOUR_PATH\backend\home")
 
 import adapter
-a = adapter.ReunionAdapter()
+a = adapter.KairosAdapter()
 a.DRY_RUN = True
 
 print("=== send_message 实际源码（call 分支附近）===")

@@ -83,7 +83,7 @@ class PlanReviewReq(_BM):
 
 STATE_PATH = Path(r"./data\home_state.json")
 CONFIG_PATH = Path(r"./data\config.json")
-HOME_TOKEN = "reunion_home_2026"
+HOME_TOKEN = "kairos_home_2026"
 HTML_PATH = Path(__file__).parent / "home.html"
 ASSETS_DIR = Path(__file__).parent / "assets"
 
@@ -849,7 +849,7 @@ html,body{margin:0;padding:0;min-height:100%;background:#f5f5f5;color:#222;font-
   <button id="submitBtn" onclick="submitAll()">提交批改</button>
 </div>
 <script>
-const TOKEN = new URLSearchParams(location.search).get('t') || 'reunion_home_2026';
+const TOKEN = new URLSearchParams(location.search).get('t') || 'kairos_home_2026';
 let state = null;
 
 async function api(path, opts={}) {

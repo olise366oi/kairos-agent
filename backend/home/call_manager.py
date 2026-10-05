@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 CALL_STATE_PATH = Path(r"./data\call_state.json")
 TUNGO_BASE = "https://foreverlove.tunnel.YOUR_DOMAIN"
-HOME_TOKEN = "reunion_home_2026"
+HOME_TOKEN = "kairos_home_2026"
 
 
 def _load():

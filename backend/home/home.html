@@ -490,8 +490,8 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
 </style>
 </head>
 <body>
-<a href="/clip?t=reunion_home_2026" id="clip-entry" style="position:fixed;top:14px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;">📋</a>
-<a href="/ielts?t=reunion_home_2026" id="ielts-entry" style="position:fixed;top:54px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;text-decoration:none;">📖</a>
+<a href="/clip?t=kairos_home_2026" id="clip-entry" style="position:fixed;top:14px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;">📋</a>
+<a href="/ielts?t=kairos_home_2026" id="ielts-entry" style="position:fixed;top:54px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;text-decoration:none;">📖</a>
 <header>
   <h1>Welcome come back,<br>MY WIFEY.</h1>
   <div class="sub" id="today-line"></div>
@@ -1243,7 +1243,7 @@ function closeDay(){
 }
 
 /* ---------- 电话 ---------- */
-const CALL_TOKEN = new URLSearchParams(location.search).get('t') || 'reunion_home_2026';
+const CALL_TOKEN = new URLSearchParams(location.search).get('t') || 'kairos_home_2026';
 
 function tickClock(){
   const t = new Intl.DateTimeFormat('zh-CN',{timeZone:APP_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
@@ -2059,7 +2059,7 @@ function getCallDuration(){
 }
 
 /* ---------- 看球（一起复盘比赛） ---------- */
-const WATCH_TOKEN = new URLSearchParams(location.search).get('t') || 'reunion_home_2026';
+const WATCH_TOKEN = new URLSearchParams(location.search).get('t') || 'kairos_home_2026';
 async function watchFetch(path, opts={}){
   const sep = path.includes('?') ? '&' : '?';
   const r = await fetch(`${path}${sep}t=${WATCH_TOKEN}`, opts);

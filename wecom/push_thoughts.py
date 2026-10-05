@@ -21,8 +21,8 @@ import urllib.request
 from pathlib import Path
 
 _BACKEND = Path(__file__).resolve().parent.parent / "backend"
-_REUNION = Path(__file__).resolve().parent.parent
-for _p in (str(_REUNION), str(_BACKEND), str(_BACKEND / "chat"), str(_BACKEND / "agent")):
+_KAIROS = Path(__file__).resolve().parent.parent
+for _p in (str(_KAIROS), str(_BACKEND), str(_BACKEND / "chat"), str(_BACKEND / "agent")):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 

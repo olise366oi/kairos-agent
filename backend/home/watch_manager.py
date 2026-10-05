@@ -14,7 +14,7 @@ from pathlib import Path
 STATE_PATH = Path(r"./data\watch_state.json")
 LEAGUE_ID = 3614399544      # France Ligue 1
 PSG_TEAM_ID = 3976425434    # PSG
-LINK = "https://foreverlove.tunnel.YOUR_DOMAIN/watch?t=reunion_home_2026"
+LINK = "https://foreverlove.tunnel.YOUR_DOMAIN/watch?t=kairos_home_2026"
 
 
 def _load_api_key() -> str:

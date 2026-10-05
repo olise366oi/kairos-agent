@@ -99,7 +99,7 @@ _train_home_active = False  # 本次念头是否为「训练结束回家」场�
 _last_thought_reasoning = None  # 最近一次念头生成的思考链，供 send_message 存库用
 
 
-class ReunionAdapter:
+class KairosAdapter:
     def recent_messages(self, limit):
         # 直查 SQLite，取最近 limit 条
         conn = sqlite3.connect(DB_PATH)

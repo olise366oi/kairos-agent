@@ -29,7 +29,7 @@
 
 ### 一次性调试脚本与临时产物
 
-根目录 `add_*.py`、`fix_*.py`、`check_*.py`、`test_*.py`、`analyze_*.py`、`update_*.py`、`diff_check.py`、`find_all_intercepts.py`、`check_husband_calls.py` 等；`backend/_*.py` 大量 `_fix/_probe/_peek/_set/_test/_check/_backup/_diag/_scan` 等一次性脚本；`backend/home/_*.py` 同类脚本；`_check_syntax.py`、`_final_check.py`、`_supabase_connect_test.py`、`_supabase_schemas.py` 等 —— 含真实路径、临时逻辑、调试输出，非成品代码。
+根目录 `add_*.py`、`fix_*.py`、`check_*.py`、`test_*.py`、`analyze_*.py`、`update_*.py`、`diff_check.py`、`find_all_intercepts.py`、伴侣相关的一次性检查脚本 等；`backend/_*.py` 大量 `_fix/_probe/_peek/_set/_test/_check/_backup/_diag/_scan` 等一次性脚本；`backend/home/_*.py` 同类脚本；`_check_syntax.py`、`_final_check.py`、`_supabase_connect_test.py`、`_supabase_schemas.py` 等 —— 含真实路径、临时逻辑、调试输出，非成品代码。
 
 ### 未纳入展示范围的功能模块
 

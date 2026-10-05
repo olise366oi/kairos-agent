@@ -5,7 +5,7 @@ sys.path.insert(0, r"YOUR_PATH\backend\proactive")
 sys.path.insert(0, r"YOUR_PATH\backend\companion_awakening")
 
 from companion_awakening import AwakeningService, AwakeningConfig
-from adapter import ReunionAdapter, _parse_drivesoid
+from adapter import KairosAdapter, _parse_drivesoid
 
 DRIVESOID_MAP = {
     "longing": "attachment",
@@ -29,7 +29,7 @@ def sync_drivesoid_to_engine(engine, alpha=0.4):
 
 
 service = AwakeningService(
-    adapter=ReunionAdapter(),
+    adapter=KairosAdapter(),
     state_dir=r"YOUR_PATH\backend\proactive\state",
     # 想了就全发：发送门槛去掉（speak_threshold=0），生成念头就发；
     # think_threshold 保留（控制思考频率，避免每 60 秒烧一次 token）
