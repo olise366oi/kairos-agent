@@ -14,9 +14,9 @@ import urllib.error
 from pathlib import Path
 from datetime import datetime, timezone, date
 
-SENTENCES_PATH = Path(r"./data\ielts_sentences.json")
-WORDS_PATH = Path(r"./data\ielts_wrong_words.json")
-STATE_PATH = Path(r"./data\ielts_state.json")
+SENTENCES_PATH = Path("./data/ielts_sentences.json")
+WORDS_PATH = Path("./data/ielts_wrong_words.json")
+STATE_PATH = Path("./data/ielts_state.json")
 
 # config.py 在 YOUR_PATH\backend
 for _p in (r"YOUR_PATH\backend", r"YOUR_PATH\backend\agent"):

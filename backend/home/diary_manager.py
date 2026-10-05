@@ -14,8 +14,8 @@ def _home_today() -> date:
     home_tz = now_utc + timedelta(hours=offset)
     return home_tz.date()
 
-DIARY_PATH = Path(r"./data\diary.json")
-ARCHIVE_PATH = Path(r"./data\diary_archive.json")
+DIARY_PATH = Path("./data/diary.json")
+ARCHIVE_PATH = Path("./data/diary_archive.json")
 
 
 def _load():

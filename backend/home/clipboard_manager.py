@@ -2,8 +2,8 @@ import json
 import base64
 from pathlib import Path
 
-CLIP_PATH = Path(r"./data\clipboard.json")
-IMG_PATH = Path(r"./data\clipboard_image.png")
+CLIP_PATH = Path("./data/clipboard.json")
+IMG_PATH = Path("./data/clipboard_image.png")
 
 
 def get_clip():

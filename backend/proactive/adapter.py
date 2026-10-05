@@ -14,10 +14,10 @@ sys.path.insert(0, r"YOUR_PATH\backend\companion_awakening")
 sys.path.append(r"YOUR_PATH\wecom")
 sys.path.append(r"YOUR_PATH")
 
-DB_PATH = Path(r"./data\chat_history.db")
+DB_PATH = Path("./data/chat_history.db")
 DRY_RUN = False  # 真发模式
 
-HOME_STATE = Path(r"./data\home_state.json")
+HOME_STATE = Path("./data/home_state.json")
 
 DRIVESOID_URL = "http://127.0.0.1:24601/api/drives/context"
 
@@ -313,7 +313,7 @@ class KairosAdapter:
         try:
             import json as _json
             from pathlib import Path as _Path
-            _q_path = _Path(r"./data\proactive_state.json")
+            _q_path = _Path("./data/proactive_state.json")
             if _q_path.exists():
                 _q = _json.loads(_q_path.read_text(encoding="utf-8"))
                 return bool(_q.get("night_quiet"))
@@ -360,8 +360,10 @@ class KairosAdapter:
         if _train_home_active and intent != "moment":
             try:
                 import sys as _sys
-                if r"YOUR_PATH\backend\home" not in _sys.path:
-                    _sys.path.insert(0, r"YOUR_PATH\backend\home")
+                from pathlib import Path as _Path
+                _HOME_DIR = _Path(__file__).resolve().parent.parent / "home"
+                if str(_HOME_DIR) not in _sys.path:
+                    _sys.path.insert(0, str(_HOME_DIR))
                 from fridge_filler import add_bought_items_to_fridge
                 bought = self._extract_bought_names(text)
                 if bought:
@@ -377,7 +379,7 @@ class KairosAdapter:
         try:
             import json as _json
             from pathlib import Path as _Path
-            _q_path = _Path(r"./data\proactive_state.json")
+            _q_path = _Path("./data/proactive_state.json")
             if _q_path.exists():
                 _q = _json.loads(_q_path.read_text(encoding="utf-8"))
                 if _q.get("night_quiet") and intent not in ("moment", "plan", "diary"):

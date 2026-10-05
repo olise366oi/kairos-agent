@@ -526,11 +526,11 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
     </div>
   </div>
 
-  <div class="card"><h2><span class="icon">⚽</span>下一场比赛</h2>
+  <div class="card"><h2><span class="icon">📅</span>下一项行程</h2>
     <div class="row"><span class="item-name" id="match-text">待定</span></div>
   </div>
 
-  <div class="card"><h2><span class="icon">🏁</span>上一场比赛</h2>
+  <div class="card"><h2><span class="icon">📅</span>上一项行程</h2>
     <div class="row"><span class="item-name" id="lastmatch-text">还没有记录</span></div>
     <div class="row"><span class="item-name" id="lastmatch-goal"></span></div>
     <div class="row"><span class="item-name" id="lastmatch-assist"></span></div>
@@ -1205,7 +1205,7 @@ async function fridgeAdd(){
 // ===== 日历页 =====
 const CAL_URL='/api/home/calendar';
 const EV_CLS={match:'ev-match',festival_cn:'ev-festival_cn',festival_fr:'ev-festival_fr',festival_jp:'ev-festival_jp',festival_intl:'ev-festival_intl',birthday:'ev-birthday',anniversary:'ev-anniversary',special:'ev-special',solar_term:'ev-solar_term',date:'ev-date'};
-const EV_NAME={match:'比赛',festival_cn:'中国节日',festival_fr:'法国节日',festival_jp:'日本节日',festival_intl:'国际节日',birthday:'生日',anniversary:'纪念日',special:'特殊日子',solar_term:'节气',date:'约会'};
+const EV_NAME={match:'行程',festival_cn:'中国节日',festival_fr:'法国节日',festival_jp:'日本节日',festival_intl:'国际节日',birthday:'生日',anniversary:'纪念日',special:'特殊日子',solar_term:'节气',date:'约会'};
 let calY=0,calM=0,lastCal=null;
 
 function showCalendar(){

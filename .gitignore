@@ -13,6 +13,9 @@ state/
 !backend/data/
 !backend/data/persona_default.md
 !backend/data/market_kb.txt
+# 运行期状态（测试/演示产生）不入库
+backend/data/home_state.json
+backend/data/call_state.json
 
 # Drivesoid 运行时配置与日志
 drives.config.json

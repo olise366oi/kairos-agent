@@ -2,9 +2,9 @@ import random
 from pathlib import Path
 import json
 
-COOK_KB_PATH = Path(r"./data\cook_kb.txt")
-MARKET_KB_PATH = Path(r"./data\market_kb.txt")
-STATE_PATH = Path(r"./data\home_state.json")
+COOK_KB_PATH = Path("./data/cook_kb.txt")
+MARKET_KB_PATH = Path("./data/market_kb.txt")
+STATE_PATH = Path("./data/home_state.json")
 
 
 def _load_cook_kb() -> dict:

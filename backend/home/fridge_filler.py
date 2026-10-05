@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from config import TIMEZONE
 from pathlib import Path
 
-MARKET_KB_PATH = Path(r"./data\market_kb.txt")
+MARKET_KB_PATH = Path("./data/market_kb.txt")
 
 # 酱类：每瓶可使用次数
 SAUCE_USES_PER_BOTTLE = 15
@@ -218,7 +218,7 @@ def _pick_items(n: int = 2) -> list:
 
 # ===== 冰箱操作 =====
 
-STATE_PATH = Path(r"./data\home_state.json")
+STATE_PATH = Path("./data/home_state.json")
 
 
 def _load_state() -> dict:

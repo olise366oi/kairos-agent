@@ -3,7 +3,7 @@ import uuid
 from pathlib import Path
 from datetime import datetime, timezone
 
-MOMENTS_PATH = Path(r"./data\moments.json")
+MOMENTS_PATH = Path("./data/moments.json")
 
 
 def _load():

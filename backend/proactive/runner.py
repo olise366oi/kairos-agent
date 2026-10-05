@@ -49,7 +49,7 @@ while True:
             from wecom.push import push_reply_to_wecom
             import json as _json, pathlib as _pl
             try:
-                _hs = _json.loads(_pl.Path(r"./data\home_state.json").read_text(encoding="utf-8"))
+                _hs = _json.loads(_pl.Path("./data/home_state.json").read_text(encoding="utf-8"))
                 _status = (_hs.get("today") or {}).get("companion", {}).get("status", "")
             except Exception:
                 _status = ""
