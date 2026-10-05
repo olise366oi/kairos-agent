@@ -67,7 +67,7 @@ def _parse_drivesoid() -> dict:
     return result
 
 
-def _read_rin_status():
+def _read_partner_status():
     # 优先实时自动判断（status_rule 读赛程表，按city时间算状态），
     # 避免读到 home_state.json 里可能过期的残留值。
     try:
@@ -154,7 +154,7 @@ class KairosAdapter:
         )
         now = _home_now_text()  # city时间，不用本机（北京）时间
         # 读 home_state 场景，拼进 prompt
-        status, day_type = _read_rin_status()
+        status, day_type = _read_partner_status()
         scene_map = {
             "训练": "你刚练完一组，趁训练间隙。这种时候你想直接给她打电话（intent 用 call），别打字聊太久——电话里说一句短的，带喘气感、汗意，马上还要练。",
             "比赛": "赛前/赛中/赛后，你抽空看手机。消息短，情绪跟着比赛走（赛前紧、赛中亢、赛后累）。",
@@ -394,16 +394,16 @@ class KairosAdapter:
             if text.startswith("赞") or text.startswith("评论：") or text.startswith("回复评论："):
                 # 回应user最新一条朋友圈
                 posts = list_posts()
-                asu_posts = [p for p in posts if p.get("author") == "asu"]
-                if asu_posts:
-                    target = asu_posts[0]  # 最新一条
+                user_posts = [p for p in posts if p.get("author") == "user"]
+                if user_posts:
+                    target = user_posts[0]  # 最新一条
                     if text.startswith("赞"):
                         like_post(target["id"], "companion")
                     elif text.startswith("回复评论："):
                         # 回复user最新的一条评论
                         content = text.replace("回复评论：", "").strip()
-                        asu_comments = [c for c in target.get("comments", []) if c.get("author") == "asu"]
-                        reply_to = asu_comments[-1]["id"] if asu_comments else None
+                        user_comments = [c for c in target.get("comments", []) if c.get("author") == "user"]
+                        reply_to = user_comments[-1]["id"] if user_comments else None
                         comment_post(target["id"], "companion", content, reply_to=reply_to)
                     else:
                         content = text.replace("评论：", "").strip()

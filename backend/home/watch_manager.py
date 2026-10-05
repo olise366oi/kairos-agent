@@ -11,13 +11,14 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-STATE_PATH = Path(r"./data\watch_state.json")
+STATE_PATH = Path("./data/watch_state.json")
 LEAGUE_ID = 3614399544      # France Ligue 1
 PSG_TEAM_ID = 3976425434    # PSG
 HOME_TOKEN = os.environ.get("HOME_TOKEN")
 if not HOME_TOKEN:
     raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
-LINK = f"https://foreverlove.tunnel.YOUR_DOMAIN/watch?t={HOME_TOKEN}"
+TUNGO_BASE = os.environ.get("TUNGO_BASE", "https://your-tunnel.example.com")
+LINK = f"{TUNGO_BASE}/watch?t={HOME_TOKEN}"
 
 
 def _load_api_key() -> str:

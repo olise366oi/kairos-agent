@@ -27,7 +27,7 @@ def add_post(author: str, content: str, pinned: bool = False) -> dict:
     data = _load()
     post = {
         "id": uuid.uuid4().hex[:8],
-        "author": author,  # "companion" / "asu"
+        "author": author,  # "companion" / "user"
         "content": content,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "likes": [],
@@ -68,9 +68,9 @@ def comment_post(post_id: str, author: str, content: str, reply_to: str | None =
     return comment
 
 
-def recent_asu_posts(limit: int = 5) -> list:
+def recent_user_posts(limit: int = 5) -> list:
     """给 loop.py 用：user最近的朋友圈。"""
     data = _load()
-    asu_posts = [p for p in data["posts"] if p.get("author") == "asu"]
-    asu_posts.sort(key=lambda p: p.get("created_at", ""), reverse=True)
-    return asu_posts[:limit]
+    user_posts = [p for p in data["posts"] if p.get("author") == "user"]
+    user_posts.sort(key=lambda p: p.get("created_at", ""), reverse=True)
+    return user_posts[:limit]

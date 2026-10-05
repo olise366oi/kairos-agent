@@ -236,7 +236,7 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
 /* ---- 主界面 ---- */
 .moments-page{display:none;position:fixed;inset:0;z-index:40;flex-direction:column;background:url(/assets/moments_cover.jpg) center/cover no-repeat;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 .moments-page.show{display:flex;}
-.m-cover{position:relative;flex-shrink:0;height:46vh;min-height:240px;background:url(/assets/moments_asu_cover.png) center/cover no-repeat;}
+.m-cover{position:relative;flex-shrink:0;height:46vh;min-height:240px;background:url(/assets/placeholder_cover.png) center/cover no-repeat;}
 .m-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.10) 0%,transparent 45%,rgba(0,0,0,.42) 100%);}
 .m-cover-btn{position:fixed;top:14px;z-index:45;width:36px;height:36px;min-height:36px;padding:2px 0 0 0;border-radius:50%;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.28);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;box-sizing:border-box;cursor:pointer;}
 .m-cover-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-linecap:round;stroke-linejoin:round;}
@@ -260,8 +260,8 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
 .m-post{background:#fff;padding:14px 16px;position:relative;border-bottom:1px solid #f0f0f0;}
 .m-post-head{display:flex;align-items:center;gap:10px;cursor:pointer;}
 .m-avatar{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;}
-.m-avatar.companion{background:url(/assets/moments_rin_avatar.jpg) center/cover no-repeat;}
-.m-avatar.asu{background:url(/assets/moments_asu_avatar.jpg) center/cover no-repeat;}
+.m-avatar.companion{background:url(/assets/placeholder_avatar.png) center/cover no-repeat;}
+.m-avatar.user{background:url(/assets/placeholder_avatar.png) center/cover no-repeat;}
 .m-post-info{flex:1;min-width:0;}
 .m-author{font-size:16px;font-weight:600;color:#222;}
 .m-dots{position:absolute;bottom:10px;right:12px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#888;cursor:pointer;font-size:18px;border-radius:8px;}
@@ -291,7 +291,7 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
 /* ---- 个人主页 ---- */
 .moments-profile{display:none;position:fixed;inset:0;z-index:41;flex-direction:column;background:url(/assets/moments_cover.jpg) center/cover no-repeat;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 .moments-profile.show{display:flex;}
-.mp-cover{position:relative;flex-shrink:0;height:46vh;min-height:240px;background:var(--mp-cover, url(/assets/moments_asu_cover.png)) center/cover no-repeat;}
+.mp-cover{position:relative;flex-shrink:0;height:46vh;min-height:240px;background:var(--mp-cover, url(/assets/placeholder_cover.png)) center/cover no-repeat;}
 .mp-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,transparent 40%,rgba(0,0,0,.30) 100%);}
 .mp-back{position:fixed;top:14px;left:14px;z-index:45;width:36px;height:36px;min-height:36px;padding:2px 0 0 0;border-radius:50%;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.28);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;box-sizing:border-box;cursor:pointer;}
 .mp-back svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
@@ -705,8 +705,8 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
     <button class="m-cover-btn m-cover-back" onclick="closeMoments()" title="关闭">✕</button>
     <button class="m-cover-btn m-cover-cam" onclick="toggleMomentInput()" title="发表动态">📷</button>
     <button class="m-cover-btn m-cover-hist" onclick="openMomentArchive()" title="历史动态">🕘</button>
-    <div class="m-mine" onclick="openProfile('asu')">
-      <div class="m-avatar asu"></div>
+    <div class="m-mine" onclick="openProfile('user')">
+      <div class="m-avatar user"></div>
       <div class="m-mine-name">Olise</div>
     </div>
   </div>
@@ -723,7 +723,7 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
     <button class="mp-back" onclick="backToFeed()" title="返回">‹</button>
     <div class="mp-info">
       <div class="mp-name" id="mp-name">Olise</div></div>
-    <div class="mp-avatar m-avatar asu" id="mp-avatar"></div>
+    <div class="mp-avatar m-avatar user" id="mp-avatar"></div>
   </div>
   <div class="mp-body">
     <div class="mp-sig" id="mp-sig"></div>
@@ -1033,7 +1033,7 @@ function render(state){
     return latinName(a.name)+(a.minute?(' '+a.minute):'');
   }).join('、');
   document.getElementById('lastmatch-assist').textContent=assistTxt?('助攻：'+assistTxt):'';
-  document.getElementById('lastmatch-injury').textContent=lm.rin_injury?('companion伤情：'+lm.rin_injury):'';
+  document.getElementById('lastmatch-injury').textContent=lm.partner_injury?('companion伤情：'+lm.partner_injury):'';
 
   const bf=today.breakfast||{};
   document.getElementById('breakfast-main').textContent=bf.main||'';
@@ -1411,16 +1411,16 @@ async function loadDiary(){
 }
 
 // ===== 朋友圈 v5：信息流 + 个人主页 =====
-const MOMENT_AUTHORS = { companion: 'companion', asu: 'Olise' };
+const MOMENT_AUTHORS = { companion: 'companion', user: 'user' };
 const MOMENT_SIGS = {
-  asu: '这辈子最正确的决定，就是成为你的唯一。\n@companion_ltoshi',
-  companion: "T'es ma plus belle victoire.\n@Olise_Tu"
+  user: '（脱敏占位）',
+  companion: '（脱敏占位）'
 };
 const MOMENT_COVERS = {
-  asu: 'url(/assets/moments_asu_cover.png)',
-  companion: 'url(/assets/moments_rin_cover.jpg)'
+  user: 'url(/assets/placeholder_cover.png)',
+  companion: 'url(/assets/placeholder_cover.png)'
 };
-let momView = 'feed'; // feed / asu / companion
+let momView = 'feed'; // feed / user / companion
 let menuPostId = null;
 
 function relTime(tm){
@@ -1500,7 +1500,7 @@ async function loadMoments(){
       const card = document.createElement('div');
       card.className = 'm-post';
       const author = MOMENT_AUTHORS[p.author] || p.author;
-      const liked = (p.likes || []).includes('asu');
+      const liked = (p.likes || []).includes('user');
       const tm = relTime(new Date(p.created_at));
       const likeLine = (p.likes || []).length
         ? '<div class="m-like-line">❤ <span class="hl">' + (p.likes || []).map(l => MOMENT_AUTHORS[l] || l).join('、') + '</span></div>'
@@ -1652,7 +1652,7 @@ async function loadProfile(who){
       const card = document.createElement('div');
       card.className = 'mp-post' + (p.pinned ? ' pinned' : '');
       const author = MOMENT_AUTHORS[p.author] || p.author;
-      const liked = (p.likes || []).includes('asu');
+      const liked = (p.likes || []).includes('user');
       const tm = relTime(new Date(p.created_at));
       const likeLine = (p.likes || []).length
         ? '<div class="mp-like-line">❤ <span class="hl">' + (p.likes || []).map(l => MOMENT_AUTHORS[l] || l).join('、') + '</span></div>'
@@ -1780,9 +1780,9 @@ document.addEventListener('click', function(ev){
 async function pollCallState(){
   try {
     const s = await fetchCall('/api/call/state');
-    if (s.status === 'ringing_from_rin') {
+    if (s.status === 'ringing_from_companion') {
       showCallModal();
-    } else if (s.status === 'ringing_from_asu') {
+    } else if (s.status === 'ringing_from_user') {
       hideCallModal();
       showCallWaiting();
     } else if (s.status === 'accepted' && document.getElementById('call-window').style.display !== 'flex') {

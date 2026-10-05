@@ -7,8 +7,8 @@ import json
 from pathlib import Path
 from datetime import datetime, timezone
 
-CALL_STATE_PATH = Path(r"./data\call_state.json")
-TUNGO_BASE = "https://foreverlove.tunnel.YOUR_DOMAIN"
+CALL_STATE_PATH = Path("./data/call_state.json")
+TUNGO_BASE = os.environ.get("TUNGO_BASE", "https://your-tunnel.example.com")
 HOME_TOKEN = os.environ.get("HOME_TOKEN")
 if not HOME_TOKEN:
     raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
@@ -32,7 +32,7 @@ def get_state():
 
 def start_call(initiator: str) -> dict:
     state = {
-        "status": "ringing_from_rin" if initiator == "companion" else "ringing_from_asu",
+        "status": "ringing_from_companion" if initiator == "companion" else "ringing_from_user",
         "call_id": datetime.now().strftime("%Y%m%d%H%M%S"),
         "initiator": initiator,
         "started_at": datetime.now(timezone.utc).isoformat(),

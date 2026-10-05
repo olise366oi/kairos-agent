@@ -340,8 +340,8 @@ def _gen_first_line_async():
 def api_call_state(request: Request):
     _check_token(request)
     s = call_get()
-    # 拨号后：ringing_from_asu 挂起超过 2.5 秒 → 按companion状态自动接通/拒接（模拟真实等待）
-    if s.get("status") == "ringing_from_asu":
+    # 拨号后：ringing_from_user 挂起超过 2.5 秒 → 按companion状态自动接通/拒接（模拟真实等待）
+    if s.get("status") == "ringing_from_user":
         from datetime import datetime, timezone
         try:
             t0 = datetime.fromisoformat(s.get("started_at", ""))
@@ -350,8 +350,8 @@ def api_call_state(request: Request):
             logger.debug("解析通话开始时间失败: %s", e)
             age = 99.0
         if age >= 2.5:
-            rin_status = _rin_status()
-            if rin_status == "外出":
+            partner_status = _partner_status()
+            if partner_status == "外出":
                 call_reject(reason="他在外面")
             else:
                 call_accept()
@@ -360,7 +360,7 @@ def api_call_state(request: Request):
     return s
 
 
-def _rin_status() -> str:
+def _partner_status() -> str:
     """读 home_state.json 里companion的当前状态。"""
     from pathlib import Path as _P
     import json as _json
@@ -427,11 +427,11 @@ def api_call_reset(request: Request):
 def api_call_dial(request: Request):
     _check_token(request)
     # user打给companion：外出（训练/比赛）→ 拒接；在家 → 接通
-    rin_status = _rin_status()
-    if rin_status == "外出":
+    partner_status = _partner_status()
+    if partner_status == "外出":
         call_reject(reason="他在外面")
         return {"accepted": False, "status": "rejected", "reason": "他在外面训练/比赛，稍后回你"}
-    s = start_call("asu")
+    s = start_call("user")
     return {"accepted": False, "status": "ringing", "call_id": s.get("call_id", "")}
 
 
@@ -727,13 +727,13 @@ def api_moments_archive(request: Request):
 @app.post("/api/moments/post")
 def api_moments_post(req: MomentPostReq, request: Request):
     _check_token(request)
-    return add_post("asu", req.content)
+    return add_post("user", req.content)
 
 
 @app.post("/api/moments/like")
 def api_moments_like(req: MomentLikeReq, request: Request):
     _check_token(request)
-    like_post(req.post_id, "asu")
+    like_post(req.post_id, "user")
     return {"ok": True}
 
 
@@ -741,7 +741,7 @@ def api_moments_like(req: MomentLikeReq, request: Request):
 def api_moments_comment(req: MomentCommentReq, request: Request):
     _check_token(request)
     reply_to = req.reply_to if req.reply_to else None
-    return comment_post(req.post_id, "asu", req.content, reply_to=reply_to)
+    return comment_post(req.post_id, "user", req.content, reply_to=reply_to)
 
 
 # ---------- 日记 ----------

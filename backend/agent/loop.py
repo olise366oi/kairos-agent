@@ -481,14 +481,14 @@ def load_recent_moments(limit: int = 10) -> str:
         return ""
 
 
-def load_asu_moments() -> str:
+def load_user_moments() -> str:
     """读 moments.json，返回user最近 5 条朋友圈文本。没有就返回空。"""
     try:
         import sys as _sys
         if r"YOUR_PATH\backend\home" not in _sys.path:
             _sys.path.insert(0, r"YOUR_PATH\backend\home")
-        from moments_manager import recent_asu_posts
-        posts = recent_asu_posts(5)
+        from moments_manager import recent_user_posts
+        posts = recent_user_posts(5)
         if not posts:
             return ""
         return "\n".join(f"- {p['content']}" for p in posts)
@@ -947,9 +947,9 @@ def build_system_prompt(persona: str, memories: list[str], football_text: str = 
     home_eaten = load_home_eaten()
     if home_eaten:
         parts.append(f"## 今天user吃了什么（他今天知道的，聊天时可以自然提及，别像查记录）\n{home_eaten}")
-    asu_moments = load_asu_moments()
-    if asu_moments:
-        parts.append(f"## user最近发的朋友圈（你刷到了，聊天时可以自然提及）\n{asu_moments}")
+    user_moments = load_user_moments()
+    if user_moments:
+        parts.append(f"## user最近发的朋友圈（你刷到了，聊天时可以自然提及）\n{user_moments}")
     # 外出（集训/比赛/约会）时他不在家，不注入"在家做的早餐/冰箱"
     _out = ("外出" in _st) if _st else False
     if not _out:
