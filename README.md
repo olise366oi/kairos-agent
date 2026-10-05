@@ -1,44 +1,13 @@
-# Kairos Agent
+# Kairos — 一个会"决定不说话"的 AI 陪伴 Agent
 
-> 一个具备主动意识、长期记忆与情感引擎的 AI 陪伴 Agent，通过多渠道成本控制实现可持续运行。
+心跳循环驱动的主动式对话 + 16 维情感状态引擎 + 双路 API 成本控制。
+12 天独立交付，7,677 行 Python + 2,163 行 JavaScript。
 
-**核心差异化：**
+> 本项目脱敏自一个真实运行的 AI 伴侣系统：人设、记忆、剧情由使用者自行配置，
+> 代码层不包含任何私人信息。首次启动会引导你填写自己的 persona 与 API Key。
 
-- 🧠 **主动式 Agent**：心跳循环驱动，在合适时机主动发起对话，而非被动等待。
-- 💰 **多渠道成本控制**：同一模型多路 API 调度 + 配额回退，主动触发场景下仍能控制调用成本。
-- ❤️ **独立情感引擎**：跨端同步的情感状态，让陪伴更连贯。
-- 📱 **三端一致**：移动端 Web、桌面悬浮球、企业微信推送无缝协同。
+![界面预览](backend/docs/screenshot-chat.png)
 
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Uvicorn-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![MCP](https://img.shields.io/badge/MCP-stdio%20JSON--RPC-6E56CF)](https://modelcontextprotocol.io)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-
----
-
-## 一句话说清楚
-
-市面上大多数"AI 伴侣"是**被动应答**：你不发消息，它永远沉默。
-Kairos 做的是**主动式**：它维护一套连续的情感状态和角色状态机，在训练间隙、比赛日、睡前等真实场景里**自己决定要不要开口**，并且记得三个月前你提过的事。
-
-三个工程上真正难的点：
-- **主动性**：什么时候该说话、什么时候该闭嘴——这是可用性问题，不是模型问题
-- **成本**：主动触发意味着请求量是被动聊天的数倍，必须有成本控制
-- **一致性**：跨 Web / 企业微信 / 桌面三端，状态不能穿帮
-
----
-
-## ⚠️ 关于本仓库（重要）
-
-这是一个**脱敏展示版**，用于展示系统架构与工程能力，**不是可直接部署的生产版本**。
-
-- `backend/home/` 下引用的部分业务模块（赛事抓取、状态规则、聊天历史等）因涉及第三方数据源与个人数据，**已在公开版中移除**；移动端 Web 主链路无法在本仓库内单独启动。
-- `wecom/`（企业微信接入）与 `backend/drivesoid/`（情感引擎）**相对独立，可独立运行**，见下方"快速开始"。
-- 如需完整运行移动端 Web，需自行补齐被移除的模块，接口约定见 `docs/`。
-- **所有"实测数据"（消息量、调用次数、状态快照数、沉默率等）均来自开发期本地运行记录**，相关数据库与日志文件未随仓库公开，无法在公开版中直接复算。保留这些数字是为了说明机制确实在运行，而非为了展示规模。
-
----
 
 ## 界面预览
 
