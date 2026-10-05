@@ -1,5 +1,6 @@
 import hmac
 import json
+import logging
 import os
 import re as _re
 import threading
@@ -83,6 +84,14 @@ class PlanReviewReq(_BM):
     decision: str
     reason: str = ""
 
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+
+
 STATE_PATH = Path("./data/home_state.json")
 CONFIG_PATH = Path("./data/config.json")
 HOME_TOKEN = os.environ.get("HOME_TOKEN")
@@ -119,7 +128,8 @@ def _load_api_key():
         with open(CONFIG_PATH, encoding="utf-8") as f:
             cfg = json.load(f)
         return cfg.get("api_key", "")
-    except Exception:
+    except (FileNotFoundError, json.JSONDecodeError, PermissionError) as e:
+        logger.warning("读取 config.json 失败: %s", e)
         return ""
 
 
@@ -138,7 +148,8 @@ def get_balance(request: Request):
             data = json.loads(resp.read().decode("utf-8"))
         return data
     except Exception as e:
-        return {"error": f"{type(e).__name__}: {e}"}
+        logger.warning("余额查询失败: %s", e)
+        return {"error": "余额查询服务暂时不可用"}
 
 @app.get("/api/home/api_usage")
 def get_api_usage(request: Request):
@@ -164,13 +175,15 @@ def get_api_usage(request: Request):
             else:
                 balance_err = d.get("error") or "无余额信息"
     except Exception as e:
-        balance_err = f"{type(e).__name__}: {e}"
+        logger.warning("余额查询失败: %s", e)
+        balance_err = "用量查询服务暂时不可用"
 
     # 火山引擎现金余额（AK/SK 查询）
     try:
         from volc_balance import get_balance
         volc = get_balance()
-    except Exception:
+    except (ImportError, OSError, ValueError, TypeError, KeyError) as e:
+        logger.warning("火山余额查询失败: %s", e)
         volc = None
 
     today = all_today()
@@ -299,9 +312,9 @@ def _gen_first_line_async():
             if first:
                 save_message("assistant", _fold_call_prefix(first))
                 set_first_line(first)
-                print("[call] companion已开口", flush=True)
+                logger.info("companion 已开口")
         except Exception as e:
-            print(f"[call] 接通首句生成失败: {type(e).__name__} {e}", flush=True)
+            logger.warning("接通首句生成失败: %s", e)
 
     threading.Thread(target=worker, daemon=True).start()
 
@@ -316,7 +329,8 @@ def api_call_state(request: Request):
         try:
             t0 = datetime.fromisoformat(s.get("started_at", ""))
             age = (datetime.now(timezone.utc) - t0).total_seconds()
-        except Exception:
+        except (ValueError, TypeError) as e:
+            logger.debug("解析通话开始时间失败: %s", e)
             age = 99.0
         if age >= 2.5:
             rin_status = _rin_status()
@@ -338,7 +352,8 @@ def _rin_status() -> str:
         with open(state_p, encoding="utf-8") as f:
             st = _json.load(f)
         return (st.get("today") or {}).get("companion", {}).get("status", "在家")
-    except Exception:
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, OSError) as e:
+        logger.warning("读取状态文件失败: %s", e)
         return "在家"
 
 
@@ -371,7 +386,7 @@ def api_call_hangup(req: CallEndReq, request: Request):
         else:
             save_message("user", "（通话结束）")
     except Exception:
-        pass
+        logger.exception("通话结束消息保存失败")
     if req.duration:
         try:
             import sys as _sys
@@ -379,8 +394,8 @@ def api_call_hangup(req: CallEndReq, request: Request):
                 _sys.path.insert(0, r"YOUR_PATH")
             from wecom.push import push_reply_to_wecom
             push_reply_to_wecom(f"通话结束，时长 {req.duration}")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("企微推送通话结束失败: %s", e)
     return {"ok": True}
 
 
@@ -418,6 +433,7 @@ def api_call_chat(req: CallChatReq, request: Request):
     try:
         reply, reasoning = loop_chat(req.message, api_key, return_reasoning=True)
     except Exception as e:
+        logger.warning("来电对话失败: %s", e)
         reply = f"（我这边出了点问题：{type(e).__name__}）"
     if not (reply or "").strip():
         reply = "……"
@@ -440,7 +456,8 @@ def api_home_chat_history(request: Request):
         with open(r"./data\chat_display_archive.json", encoding="utf-8") as _f:
             _data = json.load(_f)
         archive = _data.get("messages", []) if isinstance(_data, dict) else []
-    except Exception:
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+        logger.warning("读取聊天归档失败: %s", e)
         archive = []
     current = get_history(80)
     return {"messages": archive + current, "archive_count": len(archive)}
@@ -460,6 +477,7 @@ def api_home_chat(req: CallChatReq, request: Request):
     try:
         reply, reasoning = loop_chat(req.message, api_key, return_reasoning=True)
     except Exception as e:
+        logger.warning("聊天回复失败: %s", e)
         reply = f"（我这边出了点问题：{type(e).__name__}）"
     if not (reply or "").strip():
         reply = "……"
@@ -478,7 +496,7 @@ def api_home_chat(req: CallChatReq, request: Request):
             reply_full = reply + call_link_text
             save_message("assistant", reply_full, reasoning_content=reasoning)
         except Exception as _ce:
-            print("[home] 触发电话失败:", _ce, flush=True)
+            logger.warning("触发电话失败: %s", _ce)
             reply_full = reply
             msg_id = save_message("assistant", reply_full, reasoning_content=reasoning)
     else:
@@ -491,7 +509,7 @@ def api_home_chat(req: CallChatReq, request: Request):
         from wecom.push import push_pair_async
         push_pair_async(req.message, reply_full)
     except Exception as _e:
-        print("[home] 同步企微失败:", _e, flush=True)
+        logger.warning("同步企微失败: %s", _e)
     return {"reply": reply_full, "id": msg_id}
 
 
@@ -521,7 +539,7 @@ def api_home_new_chat(request: Request):
                 _shutil.copy2(_p, _os.path.join(_bak, _f))
                 _backed.append(_f)
             except Exception as _e:
-                print("[home] 备份失败:", _f, _e, flush=True)
+                logger.warning("备份失败: %s %s", _f, _e)
 
     # 2. 清空聊天记录
     _deleted = 0
@@ -532,7 +550,7 @@ def api_home_new_chat(request: Request):
         _conn.commit()
         _conn.close()
     except Exception as _e:
-        print("[home] 清聊天失败:", _e, flush=True)
+        logger.warning("清聊天记录失败: %s", _e)
 
     # 3. 重置亲密状态（基线 15，无会话计时）
     try:
@@ -540,7 +558,7 @@ def api_home_new_chat(request: Request):
             json.dumps({"arousal": 15.0, "ts": _now, "enter_ts": None})
         )
     except Exception as _e:
-        print("[home] 重置亲密失败:", _e, flush=True)
+        logger.warning("重置亲密状态失败: %s", _e)
 
     # 4. 清早餐 / 今天吃了什么（保留冰箱）
     try:
@@ -552,7 +570,7 @@ def api_home_new_chat(request: Request):
             json.dumps(_st, ensure_ascii=False, indent=2)
         )
     except Exception as _e:
-        print("[home] 清早餐失败:", _e, flush=True)
+        logger.warning("清早餐记录失败: %s", _e)
 
     # 5. 清日记 / 朋友圈当前动态（日记先归档到历史，朋友圈历史归档保留）
     try:
@@ -561,7 +579,7 @@ def api_home_new_chat(request: Request):
             json.dumps({"posts": []}, ensure_ascii=False)
         )
     except Exception as _e:
-        print("[home] 清日记/朋友圈失败:", _e, flush=True)
+        logger.warning("清日记/朋友圈失败: %s", _e)
 
     # 6. 重置看球残留（watch_state）
     try:
@@ -580,7 +598,7 @@ def api_home_new_chat(request: Request):
             _w["ended"] = False
             open(_wp, "w", encoding="utf-8", newline="").write(json.dumps(_w, ensure_ascii=False, indent=2))
     except Exception as _e:
-        print("[home] 重置看球失败:", _e, flush=True)
+        logger.warning("重置看球状态失败: %s", _e)
 
     # 7. 更新新对话时间戳（兼容 LLM 上下文过滤）
     open(_os.path.join(_data, "last_clear.txt"), "w").write(str(_now))
@@ -684,7 +702,8 @@ def api_moments_archive(request: Request):
         with open(r"./data\moments_archive.json", encoding="utf-8") as _f:
             _data = json.load(_f)
         return {"posts": _data.get("posts", []) if isinstance(_data, dict) else []}
-    except Exception:
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+        logger.warning("读取朋友圈归档失败: %s", e)
         return {"posts": []}
 
 
@@ -963,8 +982,8 @@ def api_plans_review(req: PlanReviewReq, request: Request):
             __import__("json").dumps(build_cache(), ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("plans 缓存写入失败: %s", e)
     # user留了理由 → 自动让companion生成回复并推给她
     if req.reason and req.reason.strip():
         try:
@@ -991,10 +1010,10 @@ def api_plans_review(req: PlanReviewReq, request: Request):
                 try:
                     from chat.history import save_thought
                     save_thought("批阅回复", _reply, reasoning=_reasoning)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning("保存批阅思考链失败: %s", e)
         except Exception as _e:
-            print("批阅回复生成失败:", _e)
+            logger.warning("批阅回复生成失败: %s", _e)
     return result
 
 
@@ -1095,6 +1114,7 @@ def api_watch_chat(req: WatchChatReq, request: Request):
     try:
         reply = watch_chat(req.message, context=ctx)
     except Exception as e:
+        logger.warning("看球聊天失败: %s", e)
         reply = f"（我这边出了点问题：{type(e).__name__}）"
     if not (reply or "").strip():
         reply = "……"
