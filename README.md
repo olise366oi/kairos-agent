@@ -232,3 +232,14 @@ flowchart TD
 - 本仓库原创代码以 **MIT** 许可开源（见根目录 `LICENSE`，Copyright (c) 2026 Kairos Project）。
 - `backend/drivesoid/` 为**独立开源组件**（情感引擎），遵循其自带 **CC-BY-NC-SA-4.0** 许可（见 `backend/drivesoid/LICENSE`）。
 - 商用场景建议将情感引擎替换为自研实现——架构已解耦（REST + MCP 双入口），替换不影响主链路。
+
+## 测试
+
+```bash
+cd backend
+pip install pytest httpx
+python -m pytest tests/ -v
+```
+
+测试使用临时 HOME 目录隔离，不会污染你的 `~/.kairos/` 配置。
+测试在 Python 3.14.7 + pytest 9.1.1 下验证通过（6 passed）。生产依赖锁版本见 requirements.txt，如遇版本兼容问题请以锁版为准。
