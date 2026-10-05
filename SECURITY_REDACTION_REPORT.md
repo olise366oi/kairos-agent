@@ -1,6 +1,6 @@
 # SECURITY REDACTION REPORT
 
-作品集仓库 `reunion-portfolio` 脱敏报告（含第一轮脱敏与第二轮时区/标识符修正）。撰写日期：2026-10-05。
+作品集仓库 `本作品集仓库` 脱敏报告（含第一轮脱敏与第二轮时区/标识符修正）。撰写日期：2026-10-05。
 
 ## 1. 已删除文件清单（路径 + 原因）
 
@@ -12,15 +12,15 @@
 | --- | --- |
 | `backend/.env`、`backend/home/.env` | 数据库连接串、API Key |
 | `sidecar/Drivesoid/.env` | 情感引擎 API Key |
-| `~/.reunion/config.json`、`~/.reunion/volc_ak_sk.txt` | 运行期 LLM 配置与云账户签名密钥（运行期数据目录，未触碰） |
+| `~/.kairos/config.json`、`~/.kairos/volc_ak_sk.txt` | 运行期 LLM 配置与云账户签名密钥（运行期数据目录，未触碰） |
 
 ### 个人身份 / 剧情 / 对话数据
 
 | 路径 | 原因 |
 | --- | --- |
 | `backend/persona/`（含 `persona*.md`、`persona_distilled*`） | 角色人设 |
-| `~/.reunion/persona.md`、`memory_core.txt`、`profile.txt`、`trivia.txt`、`nutrition_kb.txt`、`psych_kb.txt` | 角色记忆与知识库数据（运行期数据目录） |
-| `~/.reunion/home_state.json`、`moments.json`、`diary.json`、`clipboard.json`、`watch_state.json`、`call_state.json`、`chat_history.db`、`schedule.txt`、`match_results.json` 等 | 对话历史 / 状态 / 朋友圈 / 日记 / 赛程（运行期数据目录） |
+| `~/.kairos/persona.md`、`memory_core.txt`、`profile.txt`、`trivia.txt`、`nutrition_kb.txt`、`psych_kb.txt` | 角色记忆与知识库数据（运行期数据目录） |
+| `~/.kairos/home_state.json`、`moments.json`、`diary.json`、`clipboard.json`、`watch_state.json`、`call_state.json`、`chat_history.db`、`schedule.txt`、`match_results.json` 等 | 对话历史 / 状态 / 朋友圈 / 日记 / 赛程（运行期数据目录） |
 | `backend/data/`、`backend/logs/`、`backend/home/*.log`、根目录 `*.log` | 运行日志（含对话与诊断信息） |
 | `backend/_all_chat.txt`、`_recent_chat*.txt`、`_fights_*.txt`、`_tracks_*.txt` 等 | 对话导出与私人关系时间线 |
 | `backend/home/assets/`、`backend/home/_shots/`、`reunion_icon_src.png` | 个人照片 / 截图 / 图标素材 |
@@ -61,7 +61,7 @@
 | PostgreSQL 连接串 | `YOUR_DB_URL` |
 | API Key（足球数据 / 云数据库账号密码 / 兜底 `sk-*`） | `YOUR_API_KEY` |
 | 云服务实例标识（docstring 中的资源后缀） | 编号（2 号 / 3 号） |
-| 本地绝对路径（用户目录 / 项目目录 / 数据目录） | `./data` / `YOUR_PATH` / `~/.reunion` |
+| 本地绝对路径（用户目录 / 项目目录 / 数据目录） | `./data` / `YOUR_PATH` / `~/.kairos` |
 | 剧情数据（纪念日、医疗诊断词、亲密规则、恋爱时间线等） | 占位符 / 删除 / 中性表述 |
 | 素材文件名中的角色名缩写 | 中性文件名 |
 
@@ -75,7 +75,7 @@
 
 ## 4. 敏感词扫描命令与结果概述
 
-扫描方式：对 `reunion-portfolio` 全库执行正则匹配（区分大小写按词表），词表覆盖：人名（含中文 / 音译 / 罗马音 / 英文名）、城市与家乡名、自建隧道域名、云数据库域名与连接串关键字、足球数据 API Key 前缀、账户密码片段、纪念日日期、Windows 用户目录名、原项目绝对路径、医疗诊断词、剧情关键词等。扫描范围为仓库内**代码与数据文件**；本报告文件作为脱敏记录文档，包含被替换项字面量（如 `Europe/Paris`）属预期，不计入残留。
+扫描方式：对 `本作品集仓库` 全库执行正则匹配（区分大小写按词表），词表覆盖：人名（含中文 / 音译 / 罗马音 / 英文名）、城市与家乡名、自建隧道域名、云数据库域名与连接串关键字、足球数据 API Key 前缀、账户密码片段、纪念日日期、Windows 用户目录名、原项目绝对路径、医疗诊断词、剧情关键词等。扫描范围为仓库内**代码与数据文件**；本报告文件作为脱敏记录文档，包含被替换项字面量（如 `Europe/Paris`）属预期，不计入残留。
 
 实际执行结果（撰写时运行所得）：
 

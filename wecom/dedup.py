@@ -5,7 +5,7 @@
 这里用本地文件记录已处理过的 MsgId：重复推送直接跳过，避免同一条消息
 被重复写入对话历史、重复调用 agent、重复回发。
 
-去重记录持久化在 ~/.reunion/wecom_processed_msgids.json，重启后依然生效。
+去重记录持久化在 ~/.kairos/wecom_processed_msgids.json，重启后依然生效。
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import json
 import threading
 from pathlib import Path
 
-_PROCESSED_PATH = Path.home() / ".reunion" / "wecom_processed_msgids.json"
+_PROCESSED_PATH = Path.home() / ".kairos" / "wecom_processed_msgids.json"
 _lock = threading.Lock()
 _MAX = 2000
 

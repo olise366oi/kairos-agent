@@ -32,7 +32,7 @@ if str(_WECOM_DIR) not in sys.path:
 
 from push import _get_last_user  # noqa: E402  （复用最近企微用户 userid）
 
-THOUGHTS_CONFIG_PATH = Path.home() / ".reunion" / "wecom_config_thoughts.json"
+THOUGHTS_CONFIG_PATH = Path.home() / ".kairos" / "wecom_config_thoughts.json"
 
 _token_lock = threading.Lock()
 _token_cache: dict = {"token": None, "expire_at": 0}

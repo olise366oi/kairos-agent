@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """企业微信接入配置：从用户手动填写的 wecom_config.json 读取，不写死在代码里。
 
-配置文件位置：~/.reunion/wecom_config.json
+配置文件位置：~/.kairos/wecom_config.json
 字段：
   corp_id          企业ID（企业微信管理后台 → 我的企业 → 企业ID）
   agent_id         自建应用 AgentId（应用管理 → 自建 → 应用详情）

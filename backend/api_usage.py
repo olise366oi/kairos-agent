@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """本地 LLM token 用量统计（按 key、按天累计）。
-文件：~/.reunion\\api_usage.json
+文件：~/.kairos\\api_usage.json
 key_id: api1=DeepSeek 官方 / api2=方舟dpV4.1flash / api3=方舟dpV4flash正式版
 seeds 字段：用户手动补录的历史用量（按自然月），计入本月/累计。
 """
@@ -9,7 +9,7 @@ import threading
 import time
 from pathlib import Path
 
-USAGE_PATH = Path.home() / ".reunion" / "api_usage.json"
+USAGE_PATH = Path.home() / ".kairos" / "api_usage.json"
 _lock = threading.Lock()
 
 

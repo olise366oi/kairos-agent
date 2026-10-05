@@ -140,7 +140,7 @@ Kairos 做的是**主动式**：它维护一套连续的情感状态和角色状
 cd backend && pip install -r requirements.txt
 
 # 2. 配置（首次运行生成模板）
-#    ~/.reunion/config.json    LLM API Key / base_url / model
+#    ~/.kairos/config.json    LLM API Key / base_url / model
 #    wecom/wecom_config.json   企业微信自建应用凭据
 
 # 3. 启动三个进程

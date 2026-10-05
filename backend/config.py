@@ -11,7 +11,7 @@ import os
 import threading
 from pathlib import Path
 
-DATA_DIR = Path.home() / ".reunion"
+DATA_DIR = Path.home() / ".kairos"
 CONFIG_PATH = DATA_DIR / "config.json"
 PERSONA_PATH = DATA_DIR / "persona.md"
 AVATAR_PATH = DATA_DIR / "avatar.png"

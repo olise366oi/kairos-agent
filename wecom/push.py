@@ -29,7 +29,7 @@ from wecom.config import load_wecom_config, is_configured  # noqa: E402
 _token_lock = threading.Lock()
 _token_cache: dict = {"token": None, "expire_at": 0}
 
-_LAST_USER_PATH = Path.home() / ".reunion" / "wecom_last_user.txt"
+_LAST_USER_PATH = Path.home() / ".kairos" / "wecom_last_user.txt"
 
 
 def record_last_user(userid: str) -> None:

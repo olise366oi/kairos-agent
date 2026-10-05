@@ -5,7 +5,7 @@
 - POST /wecom/callback  接收用户消息 → 调 agent.chat() → 企业微信 send API 回发
 
 Access Token 自动缓存刷新（有效期 2 小时，提前 5 分钟过期）。
-配置从 ~/.reunion/wecom_config.json 读取（用户手动填，不写死在代码）。
+配置从 ~/.kairos/wecom_config.json 读取（用户手动填，不写死在代码）。
 """
 
 from __future__ import annotations
