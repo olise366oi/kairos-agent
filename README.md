@@ -1,6 +1,6 @@
 # Kairos Agent
 
-> 一个具备主动意识、长期记忆与情感引擎的 AI 陪伴 Agent，通过多模型成本路由实现可持续运行。
+> 一个具备主动意识、长期记忆与情感引擎的 AI 陪伴 Agent，通过多渠道成本控制实现可持续运行。
 
 **核心差异化：**
 
@@ -97,7 +97,7 @@ python proactive/runner.py   # 主动触发心跳
 | 🧠 长周期记忆 | ChromaDB 向量检索 + 多知识库按需注入，7 类知识域 |
 | 💓 连续情感状态 | 独立 Node.js 情感引擎，多维情感向量，聊天 ↔ 状态双向闭环 |
 | ⏰ 主动触发 | 心跳循环 + 场景上下文拼装，Agent 自主决定推送 / 记录 / 沉默 |
-| 🔀 多模型路由 | DeepSeek + 火山方舟三 API，按峰谷定价与调用来源动态切换 |
+| 🔀 多渠道成本控制 | 双路 API 池（DeepSeek 官方 + 火山方舟，同一模型），配额耗尽自动回退 |
 | 📱 三端一致 | 移动端 Web / 企业微信 / 桌面悬浮球共用同一状态层 |
 | 🔌 外部集成 | MCP 协议接入赛事数据，Open-Meteo 天气，企业微信推送 |
 
@@ -120,7 +120,7 @@ flowchart TD
         RAG["RAG 按需检索<br/>ChromaDB"]
         DE["情感引擎<br/>Drivesoid"]
         SM["状态机<br/>SQLite / JSON"]
-        RT["多模型路由<br/>DeepSeek / 火山方舟"]
+        RT["多渠道成本控制<br/>双路 API 池"]
     end
     subgraph L4["数据层"]
         DB["SQLite + PostgreSQL"]
@@ -146,7 +146,7 @@ flowchart TD
 ```
 
 - **数据层**：SQLite + PostgreSQL (Supabase)——热数据本地化（聊天历史、状态 JSON 单机零运维），云侧做知识库与备份。
-- **AI 层**：RAG 按需检索（关键词命中才注入）/ 情感引擎（独立进程多维状态）/ Agent 主动触发（心跳循环）/ 多模型路由（峰谷 + 来源 + 配额三层切换）。
+- **AI 层**：RAG 按需检索（关键词命中才注入）/ 情感引擎（独立进程多维状态）/ Agent 主动触发（心跳循环）/ 多渠道成本控制（双路 API 池 + 配额回退）。
 - **集成层**：MCP 协议（stdio JSON-RPC）/ 企业微信推送 / 内网穿透。
 - **交互层**：移动端 Web（FastAPI 单页）/ 多页面 / 桌面悬浮球（Electron）。
 
