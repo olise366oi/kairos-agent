@@ -504,7 +504,6 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
 </head>
 <body>
 <a href="/clip" id="clip-entry" style="position:fixed;top:14px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;">📋</a>
-<a href="/ielts" id="ielts-entry" style="position:fixed;top:54px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;text-decoration:none;">📖</a>
 <button id="setup-btn" title="设置" onclick="openSetupModal()" style="position:fixed;top:94px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border:none;">⚙️</button>
 <header>
   <h1>Welcome come back,<br>MY COMPANION.</h1>
@@ -861,7 +860,6 @@ let currentIndex=-1;
   if(t){TOKEN=t;localStorage.setItem('home_token',t);}
   if(!TOKEN){showTokenBox();return;}
   document.querySelector('#clip-entry').href='/clip?t='+TOKEN;
-  document.querySelector('#ielts-entry').href='/ielts?t='+TOKEN;
   if(location.pathname==='/watch'){initWatch();return;}
   checkFirstRun();
   loadState();
