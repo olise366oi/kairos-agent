@@ -13,7 +13,7 @@ from pathlib import Path
 
 STATE_PATH = Path("./data/watch_state.json")
 LEAGUE_ID = 3614399544      # France Ligue 1
-PSG_TEAM_ID = 3976425434    # PSG
+HOME_TEAM_ID = 3976425434    # 主队
 HOME_TOKEN = os.environ.get("HOME_TOKEN")
 if not HOME_TOKEN:
     raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
@@ -241,7 +241,7 @@ def _gen_commentaries(events):
             prompt = (
                 f"你在和user一起复盘你刚踢完的比赛："
                 f"{s.get('home_team')} vs {s.get('away_team')}。刚刚场上发生：{desc}。\n"
-                "用你自己的口吻给她解说：球员视角、像教练拆解那样专业但讲人话，"
+                "用你自己的口吻给她解说：像教练拆解那样专业但讲人话，"
                 "让她这个不太懂球的也听得懂。一两句话就好，自然，别报流水账，别叫她'用户'。"
             )
             reply = watch_chat(prompt)
@@ -337,7 +337,7 @@ def _mcp_call(name, args):
 
 
 def fetch_recent_finished_fixture():
-    """从 MCP 拉一场最近已结束的比赛（优先 PSG 的），返回 {fixture_id, home_team, away_team, events}。
+    """从 MCP 拉一场最近已结束的比赛（优先主队的），返回 {fixture_id, home_team, away_team, events}。
     Key 未配置时安静返回 None（companion没有比赛可看，不报错不崩溃）。"""
     if not FIVEDOLLAR_API_KEY:
         print("[watch] 未配置 FIVEDOLLARFOOTBALL_API_KEY，跳过看球发起", flush=True)
@@ -348,14 +348,14 @@ def fetch_recent_finished_fixture():
     if not finished:
         return None
     finished.sort(key=lambda f: f.get("kickoff_ts") or 0, reverse=True)
-    psg = None
+    home = None
     for f in finished:
         teams = f.get("teams") or {}
         ids = {teams.get("home", {}).get("id"), teams.get("away", {}).get("id")}
-        if PSG_TEAM_ID in ids:
-            psg = f
+        if HOME_TEAM_ID in ids:
+            home = f
             break
-    f = psg or finished[0]
+    f = home or finished[0]
     detail = _mcp_call("get_fixture", {"fixture_id": f["id"], "include_events": True, "include_stats": False})
     if not isinstance(detail, dict) or not detail.get("events"):
         print("[watch] get_fixture 返回异常（限流或数据缺失），跳过本次发起", flush=True)

@@ -69,7 +69,7 @@
 
 - **两处写死 UTC+2 小时偏移**（主对话循环的“明天计划”时间锚点、Web 端电话接通时间标签）：已中性化为变量名，但 +2 常量保留；建议后续改为按 `APP_TIMEZONE` + DST 计算。
 - **未入库模块的导入引用**：`status_rule`、`next_match`、`match_fetcher`、`match_news`、`chat.history` 等模块不在复制清单内，代码中的 `import` 保留（展示用途，运行需完整环境）。
-- **公开信息保留**：球队 / 联赛名（含“city 圣日耳曼”改写）、公开品牌（iMessage / FaceTime）、公开 API 域名（DeepSeek / 火山方舟 / Open-Meteo / 企业微信）。
+- **公开信息保留**：球队 / 联赛名（已抽象化）、公开品牌（iMessage / FaceTime）、公开 API 域名（DeepSeek / 火山方舟 / Open-Meteo / 企业微信）。
 - **桌面端未纳入**：`src/`、`electron/`（React + Electron），如需展示可单独脱敏。
 - **许可边界**：Drivesoid 为独立组件，保留其原始 `LICENSE`（CC-BY-NC-SA-4.0）与示例配置模板；根目录 `LICENSE`（MIT）仅覆盖本仓库原创代码。
 

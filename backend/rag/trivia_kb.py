@@ -53,7 +53,7 @@ def _ensure_index() -> bool:
 
 
 def search_trivia(query: str, n_results: int = 5) -> list[str]:
-    """检索与伴侣琐事记忆最相关的片段（按需调用，仅在命中琐事关键词时使用）。"""
+    """检索与共同琐事记忆最相关的片段（按需调用，仅在命中琐事关键词时使用）。"""
     if not _ensure_index():
         return []
     from rag.embedder import embed_texts

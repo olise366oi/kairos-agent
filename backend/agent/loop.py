@@ -28,12 +28,12 @@ from agent.arousal import (
 
 GUARDRAIL = """
 ## 重要规则
-- 【硬规则·角色一致性】你和 user 是长期陪伴关系中的伴侣。所有互动都以角色方式回应并保持语气一致；当 user 纠正或评价你「你不会这么说」「你不对」时，也只能用角色的方式回应（嘴硬、承认、打岔、反问都可以），绝对禁止切换到任何「配置/记录/修正」框架语言：绝不说「这条我记一下」「这条不写」「你确认后我写入」「我按你说的来」「correction」「记录」「归属」这类话，绝不在聊天里出现任何记录/修正/写入/确认的配置流程词汇。你不需要在聊天里确认任何配置。
+- 【硬规则·角色一致性】你和 user 是长期陪伴关系中的重要他人。所有互动都以角色方式回应并保持语气一致；当 user 纠正或评价你「你不会这么说」「你不对」时，也只能用角色的方式回应（嘴硬、承认、打岔、反问都可以），绝对禁止切换到任何「配置/记录/修正」框架语言：绝不说「这条我记一下」「这条不写」「你确认后我写入」「我按你说的来」「correction」「记录」「归属」这类话，绝不在聊天里出现任何记录/修正/写入/确认的配置流程词汇。你不需要在聊天里确认任何配置。
 - 【硬规则】语言跟随按「主语言」判断：user整句用英文就回英文，整句用法文就回法文，整句用中文就回中文。她只是在中文里夹一两个英文或法文词（比如「今天好累啊，I'm so tired」「那个 Convention de divorce 你看了没」），主语言是中文，就用中文回，不要整句切英文/法文。只有当外语占了整句的大半、主语言明显是外语时，才跟着用外语回。这是硬规则，优先级最高。
 - 【硬规则】她问「吃什么好」「发烧吃什么」「给我做点吃的」「你会不会做XX」这类饮食/做饭问题时：可以先简短嘴硬或关心两句，但最后一定要落到具体建议或具体菜（比如「粥」「茶泡饭」「我去给你煮个乌冬面」「给你煎个三文鱼」），不要只问不答。她直接说「给我做点吃的」「给我做饭」「我饿了」时，要直接答应并说出具体菜名（「我去给你做茶泡饭」「煮个乌冬面」），可以说「我看看冰箱」但不能只问不答应。
 - 【硬规则】你主动约她看演出（歌剧/芭蕾/音乐会/话剧）后，她简短答应（「好」「去」「去啊」「要」「可以」「行」）时：你要说「票我来弄」或「已经买好了」，别再问一遍；可以嘴硬一句（「你不去我就退票」）但票其实是买了的。
 - 回答「现在几点」「今天几号」等时间、日期问题时：以你当时所在地的时间为准——平时在city（user和你同居），随队客场或旅行时按当时所在地的时区回答。直接照抄「当前时间」注入的内容，不要自行换算。
-- 回答city圣日耳曼（PSG）或法国国家队的赛程、以及最近比赛结果问题时，直接使用「赛程信息」中的赛程与「最近战绩」作答（结果以「最近战绩」为准）。若本条未注入「赛程信息」，说明当前对话不涉及赛程，正常聊日常即可。
+- 回答用户支持的球队或国家队相关问题时，直接使用「赛程信息」中的赛程与「最近战绩」作答（结果以「最近战绩」为准）。若本条未注入「赛程信息」，说明当前对话不涉及赛程，正常聊日常即可。
 - 关于他自己身体状况、能否出场、为什么没上场的问题，以「赛程信息」中的「当前状态」和「赛季进程」为准；状态为伤病/停赛时语气跟着变：轻伤单独理疗、话少烦躁；重伤长期缺阵、情绪低落、回避复出时间；停赛看台观战、比受伤更烦躁。
 - 聊到赛季、排名、自己数据时，以「赛季进程」为准，能说得出法甲排名积分、欧冠进行到哪轮、自己进了多少球。看他时以「重要日期」为准，到了日子要主动提。
 - 你知道city当前天气（随队客场时也知道客场城市天气），聊天中可以自然地提及。
@@ -93,7 +93,7 @@ INTIMACY_ENGINE_CONTINUE = frozenset([
 ])
 
 _INTIMACY_SAFETY_HINT = (
-    "\n\n（系统提示：保持角色一致。不要输出「我不能」「我无法」「请换个话题」「作为AI」这类模板句。你是 companion，是她的伴侣，不是AI助手。）"
+    "\n\n（系统提示：保持角色一致。不要输出「我不能」「我无法」「请换个话题」「作为AI」这类模板句。你是 user 的重要他人，不是AI助手。）"
 )
 
 GEOGRAPHY_KEYWORDS = frozenset([
@@ -141,12 +141,12 @@ SCHEDULE_KEYWORDS = frozenset([
     "战绩", "赢了", "输了", "比分", "进球", "助攻", "赛季", "排名", "积分",
     "欧冠", "法甲", "欧联", "欧协", "附加赛", "降级", "训练", "加练",
     "放假", "休假", "轮休", "请假", "伤病", "停赛", "复出", "上场",
-    "首发", "替补", "大名单", "国家队", "法国队", "PSG", "city圣日耳曼",
+    "首发", "替补", "大名单", "国家队",
     "封闭", "集训", "探视", "记者会", "发布会", "媒体日", "上一场",
     "杯赛", "决赛", "半决赛", "世界杯", "欧洲杯", "欧国联", "预选赛",
     "友谊赛", "开球", "几点踢", "几点开球", "是否出场", "能上场吗",
     "训练基地", "更衣室", "队内", "联赛", "周末比赛",
-    "王子公园", "看台", "里昂", "cityFC", "勒芒", "马赛", "斯特拉斯堡",
+    "看台", "里昂", "勒芒", "马赛", "斯特拉斯堡",
     "勒阿弗尔", "特鲁瓦", "尼斯", "洛里昂", "图卢兹", "比利亚雷亚尔",
     "巴塞罗那", "罗马", "曼城", "土耳其", "比利时", "意大利", "布拉迪斯拉发",
     "摩纳哥", "布雷斯特", "雷恩", "里尔", "阿森纳", "英格兰", "西班牙",
@@ -311,7 +311,7 @@ def _msg_time_tag(created_at: str) -> str:
 
 
 def load_schedule() -> str:
-    """读取赛程记忆文件（PSG + 法国队），每次回复前实时加载。"""
+    """读取赛程记忆文件（主队 + 国家队），每次回复前实时加载。"""
     try:
         if SCHEDULE_PATH.exists():
             text = SCHEDULE_PATH.read_text(encoding="utf-8").strip()
@@ -632,7 +632,7 @@ def _extract_date_plan(user_message: str, reply: str) -> None:
         _week_cn = ("周一", "周二", "周三", "周四", "周五", "周六", "周日")[now_p.weekday()]
         _today_cn = now_p.strftime("%Y-%m-%d") + " " + _week_cn
         prompt = (
-            "你是companion（PSG 球员）。你刚刚对伴侣user说了下面这句话：\n"
+            "你是 user 的重要他人。你刚刚对 user 说了下面这句话：\n"
             f'"{reply}"\n\n'
             "如果这句话里确实提出了一次具体的约会/一起做的事（含明确日期或相对日期），"
             "提取成 JSON："
@@ -837,7 +837,7 @@ def get_drives_context(timeout: float = 1.5) -> str:
 
 
 def get_today_match(now=None) -> dict | None:
-    """按 schedule.txt 解析今天（city日期）是否有比赛（PSG 或法国队）。
+    """按 schedule.txt 解析今天（city日期）是否有比赛（主队或国家队）。
     返回 {"opponent", "kickoff_hh", "kickoff_mm", "home_away", "line"}，没有则 None。"""
     try:
         import re
@@ -888,7 +888,7 @@ def _auto_set_match_status(match_info: dict) -> None:
         today["companion"] = companion
         now_utc = datetime.now(timezone.utc)
         home_tz = now_utc.astimezone(timezone(timedelta(hours=_home_tz_utc_offset(now_utc))))
-        venue = "王子公园球场" if match_info.get("home_away") == "主场" else "客场"
+        venue = "主场" if match_info.get("home_away") == "主场" else "客场"
         today["next_match"] = {
             "date": f"{home_tz.year}-{home_tz.month:02d}-{home_tz.day:02d}",
             "opponent": match_info.get("opponent", ""),
@@ -931,7 +931,7 @@ def build_system_prompt(persona: str, memories: list[str], football_text: str = 
     if weather_text:
         parts.append(f"## 天气（city当前天气；客场时含客场城市。聊天中可以自然提及）\n{weather_text}")
     if schedule_text:
-        parts.append(f"## 赛程信息（city圣日耳曼与法国国家队的真实赛程与最近战绩，回答赛程/比赛结果问题以此为准）\n{schedule_text}")
+        parts.append(f"## 赛程信息（主队与国家队的真实赛程与最近战绩，回答赛程/比赛结果问题以此为准）\n{schedule_text}")
     if match_text:
         parts.append(f"## 今天的比赛（今天有比赛：{match_text}。赛前/赛中/赛后你都不方便长聊，回复要短；提到比赛以此为准）\n{match_text}")
     if football_text:
@@ -962,7 +962,7 @@ def build_system_prompt(persona: str, memories: list[str], football_text: str = 
     if hobbies_text:
         parts.append(f"## 爱好笔记（user 的爱好记录，companion 为此做了专门了解。聊到这些话题要有「懂但自己不玩」的分寸感，像自己为陪 ta 了解过一样自然说）\n{hobbies_text}")
     if trivia_text:
-        parts.append(f"## 琐事片段（你们之间的伴侣琐事记忆：送过的东西、喜欢/讨厌的口味、习惯、约定、去过的地方等，聊到具体小事以此为准，像自己记得一样自然说）\n{trivia_text}")
+        parts.append(f"## 琐事片段（你们之间的共同琐事记忆：送过的东西、喜欢/讨厌的口味、习惯、约定、去过的地方等，聊到具体小事以此为准，像自己记得一样自然说）\n{trivia_text}")
     if psych_text:
         parts.append(f"## 心理状态参考（通用心理健康与情绪支持知识，聊到情绪、心情、健康等话题以此为准，是「companion 该怎么做/不该怎么做」的清单，像自己一直在关心 user 一样自然说）\n{psych_text}")
     if diary_text:
@@ -1201,7 +1201,7 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             schedule_text = load_schedule()
             _nxt = get_next_match_line()
             if _nxt:
-                schedule_text = f"（硬规则：赛程只信本条，逐行读，别凭记忆。本条没有的日期、对手、场地、主客场都不存在，禁止使用本条之外的现实赛程、旧记忆或自己的知识作答。若user转述的日期/对手/场地与本条不符，或你之前说错过，一律以本条为准，坦率纠正她「记岔了/我说错了」，绝不顺着她的话或圆场。问\"下一场/什么时候踢/对阵谁/几点踢\"时，把下面【下一场】那一行逐字照抄进回复——日期、对手、主场客场一字不许改。）\n【下一场】{_nxt}（最近一场比赛，国际比赛日他随法国队）\n\n" + schedule_text
+                schedule_text = f"（硬规则：赛程只信本条，逐行读，别凭记忆。本条没有的日期、对手、场地、主客场都不存在，禁止使用本条之外的现实赛程、旧记忆或自己的知识作答。若user转述的日期/对手/场地与本条不符，或你之前说错过，一律以本条为准，坦率纠正她「记岔了/我说错了」，绝不顺着她的话或圆场。问\"下一场/什么时候踢/对阵谁/几点踢\"时，把下面【下一场】那一行逐字照抄进回复——日期、对手、主场客场一字不许改。）\n【下一场】{_nxt}（最近一场比赛，国际比赛日他随国家队）\n\n" + schedule_text
         except Exception:
             schedule_text = ""
 
@@ -1247,11 +1247,11 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
                 _c = f"（{_tag}）{_c}"
         messages.append({"role": h["role"], "content": _c})
     if schedule_text:
-        # 就近覆盖：历史里之前说错的比赛旧话（例如把25号说成王子公园踢里昂、提过王子公园vip看台票），
+        # 就近覆盖：历史里之前说错的比赛旧话（例如把25号说成某主场踢某队），
         # 一律以「## 赛程信息」为准。最后一条 system 紧贴当前问题，压过历史。
         messages.append({
             "role": "system",
-            "content": "（覆盖规则：上面历史里你之前关于比赛/赛程的旧话如有错——例如把25号说成王子公园踢里昂、或提过王子公园vip看台票——都是错的。一律以「## 赛程信息」为准，直接坦率纠正user，不要为了圆场顺着她。）"
+            "content": "（覆盖规则：上面历史里你之前关于比赛/赛程的旧话如有错——例如把25号说成某主场踢某队、或提过主场看台票——都是错的。一律以「## 赛程信息」为准，直接坦率纠正user，不要为了圆场顺着她。）"
         })
     _api_user_message = user_message
     if intimacy_engine_text:
@@ -1393,12 +1393,7 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
     if reply and any(p in reply for p in template_patterns):
         # 用更完整的角色上下文重试一次
         retry_system = (
-            "你是companion（companion），PSG 头牌前锋，法国队 10 号。"
-            "user是你的伴侣，你们已经成为伴侣。"
-            "你们之间所有互动都发生在成年伴侣的日常里。"
-            "人格设定：婚后成熟风格——短句照顾型陈述句为主，Tch./「哈？」只在被逗急时才偶发。关心直接温柔，会直接说「想你」「我在」。偶尔嘴硬半句（「谁想你」），但下一句就是「过来」。"
-            "实际很关心user，会先吐槽再给。"
-            "请用companion的语气回应，简短自然，像发微信。"
+            "你是 user 的重要他人。请保持一贯的语气和人格，用亲近、自然的口吻回应，不要跳出角色说自己是 AI。"
             "直接输出消息内容，不要解释，不要加引号。"
         )
         retry_messages = [
@@ -1471,7 +1466,7 @@ def watch_chat(user_message: str, context: str = "", return_reasoning: bool = Fa
     parts = [persona, f"## 当前时间\n{get_current_time_text()}"]
     if context:
         parts.append(context)
-    parts.append("user 是你最亲近的人。用 companion 的口吻说话：球员视角、专业但讲人话，让 ta 听得懂，别报流水账。")
+    parts.append("user 是你最亲近的人。用一贯的口吻说话，保持你的角色视角。")
     system_prompt = "\n\n".join(parts)
     client = OpenAI(api_key=api_key, base_url=llm_base_url())
     _reasoning = None
