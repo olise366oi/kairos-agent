@@ -83,8 +83,8 @@ class PlanReviewReq(_BM):
     decision: str
     reason: str = ""
 
-STATE_PATH = Path(r"./data\home_state.json")
-CONFIG_PATH = Path(r"./data\config.json")
+STATE_PATH = Path("./data/home_state.json")
+CONFIG_PATH = Path("./data/config.json")
 HOME_TOKEN = os.environ.get("HOME_TOKEN")
 if not HOME_TOKEN:
     raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
