@@ -1,3 +1,76 @@
+# Reunion · 主动式 AI 陪伴系统
+
+> 不是"你问它答"的聊天机器人，而是一个**会自己找你的常驻 Agent**。
+> 长周期记忆 + 连续情感状态 + 主动触发 + 多模型成本路由，独立完成架构设计与落地。
+
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Uvicorn-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![MCP](https://img.shields.io/badge/MCP-stdio%20JSON--RPC-6E56CF)](https://modelcontextprotocol.io)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
+
+---
+
+## 一句话说清楚
+
+市面上大多数"AI 伴侣"是**被动应答**：你不发消息，它永远沉默。
+Reunion 做的是**主动式**：它维护一套连续的情感状态和角色状态机，在训练间隙、比赛日、睡前等真实场景里**自己决定要不要开口**，并且记得三个月前你提过的事。
+
+三个工程上真正难的点：
+- **主动性**：什么时候该说话、什么时候该闭嘴——这是可用性问题，不是模型问题
+- **成本**：主动触发意味着请求量是被动聊天的数倍，必须有成本控制
+- **一致性**：跨 Web / 企业微信 / 桌面三端，状态不能穿帮
+
+---
+
+## 项目规模
+
+- **Python 7,677 行 / 46 文件**，**JavaScript 2,163 行 / 9 文件**（不含依赖与生成物）
+- 核心后端模块 **45 个**，FastAPI 路由 **52 条**（21 GET / 31 POST）
+- RAG 知识库 **7 类**，MCP 工具 **3 个**（情感引擎服务端）
+- 三端入口（移动 Web / 企微 / 桌面），情感引擎独立进程（REST + MCP 双协议）
+
+---
+
+## 系统能力
+
+| 能力 | 说明 |
+| --- | --- |
+| 🧠 长周期记忆 | ChromaDB 向量检索 + 多知识库按需注入，7 类知识域 |
+| 💓 连续情感状态 | 独立 Node.js 情感引擎，多维情感向量，聊天 ↔ 状态双向闭环 |
+| ⏰ 主动触发 | 心跳循环 + 场景上下文拼装，Agent 自主决定推送 / 记录 / 沉默 |
+| 🔀 多模型路由 | DeepSeek + 火山方舟三 API，按峰谷定价与调用来源动态切换 |
+| 📱 三端一致 | 移动端 Web / 企业微信 / 桌面悬浮球共用同一状态层 |
+| 🔌 外部集成 | MCP 协议接入赛事数据，Open-Meteo 天气，企业微信推送 |
+
+---
+
+## 架构
+
+```
+用户（移动端 Web / 企业微信 / 桌面悬浮球）
+                 │
+                 ▼
+┌──────────────────────────────────────────────────┐
+│ 交互层  home_server(FastAPI 单页应用) │ wecom 回调服务 │
+└──────────────────────┬───────────────────────────┘
+                       ▼
+┌──────────────────────────────────────────────────┐
+│ Agent 层  loop.py 主对话循环 │ proactive runner 心跳循环 │
+└───────┬──────────┬──────────┬──────────┬─────────┘
+        ▼          ▼          ▼          ▼
+   RAG 按需检索   情感引擎    状态机     多模型路由
+   (ChromaDB)  (Drivesoid) (SQLite/JSON) (DeepSeek/方舟)
+        │
+        ▼
+数据层  SQLite + PostgreSQL · 知识库文本 · 企业微信 API · 赛事 / 天气 API（MCP 接入）
+```
+
+- **数据层**：SQLite + PostgreSQL (Supabase)——热数据本地化（聊天历史、状态 JSON 单机零运维），云侧做知识库与备份。
+- **AI 层**：RAG 按需检索（关键词命中才注入）/ 情感引擎（独立进程多维状态）/ Agent 主动触发（心跳循环）/ 多模型路由（峰谷 + 来源 + 配额三层切换）。
+- **集成层**：MCP 协议（stdio JSON-RPC）/ 企业微信推送 / 内网穿透。
+- **交互层**：移动端 Web（FastAPI 单页）/ 多页面 / 桌面悬浮球（Electron）。
+
 ---
 
 ## 四个技术亮点
@@ -81,3 +154,11 @@ cd backend/drivesoid && npm install && npm start   # :24601
 # 5. 时区（任意 IANA，默认 UTC）
 export APP_TIMEZONE=Asia/Shanghai
 ```
+
+---
+
+## 第三方组件与许可
+
+- 本仓库原创代码以 **MIT** 许可开源（见根目录 `LICENSE`，Copyright (c) 2026 Reunion Project）。
+- `backend/drivesoid/` 为**独立开源组件**（情感引擎），遵循其自带 **CC-BY-NC-SA-4.0** 许可（见 `backend/drivesoid/LICENSE`）。
+- 商用场景建议将情感引擎替换为自研实现——架构已解耦（REST + MCP 双入口），替换不影响主链路。

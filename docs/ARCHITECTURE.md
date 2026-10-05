@@ -47,7 +47,7 @@
 ### 交互层：移动端 Web / 多页面 / 悬浮球
 
 - `home_server.py`（FastAPI）提供移动端单页应用 `home.html`：聊天、来电、朋友圈、日记、剪贴板、看球复盘、约会计划批阅、日历、冰箱、雅思学习、API 用量面板等模块。
-- 桌面端为 React + Electron 悬浮球（未在本作品集中展示，代码结构见原项目）。
+- 桌面端为 React + Electron 悬浮球，复用同一后端 API 与状态层。
 - iOS Safari 兼容：`position:fixed` + `100vh`、`-webkit-backdrop-filter` 双写、`-webkit-overflow-scrolling:touch` + `overscroll-behavior:contain`、`Intl.DateTimeFormat` 本地化时间。
 
 ## 关键设计
