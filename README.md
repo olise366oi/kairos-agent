@@ -9,9 +9,6 @@
 - ❤️ **独立情感引擎**：跨端同步的情感状态，让陪伴更连贯。
 - 📱 **三端一致**：移动端 Web、桌面悬浮球、企业微信推送无缝协同。
 
-> 不是"你问它答"的聊天机器人，而是一个**会自己找你的常驻 Agent**。
-> 长周期记忆 + 连续情感状态 + 主动触发 + 多模型成本路由，独立完成架构设计与落地。
-
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Uvicorn-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
