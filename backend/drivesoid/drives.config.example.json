@@ -1,0 +1,36 @@
+{
+  "persona": {
+    "name": "AI"
+  },
+  "user": {
+    "name": "User"
+  },
+  "relation": "companion",
+  "timezone_offset_hours": 0,
+  "classifier": {
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "api_key_env": "DRIVES_API_KEY"
+  },
+  "server": {
+    "port": 24601
+  },
+  "_dimensions_comment": "Optional: override neutral baseline and floor for any dimension. Remove this block to use defaults.",
+  "dimensions": {
+    "longing":        { "neutral": 0.30, "floor": 0.15 },
+    "intimacy":       { "neutral": 0.35, "floor": 0.06 },
+    "possessiveness": { "neutral": 0.30, "floor": 0.05 },
+    "lust":           { "neutral": 0.30, "floor": 0.05 },
+    "vitality":       { "neutral": 0.50, "floor": 0.08 },
+    "jealousy":       { "neutral": 0.22, "floor": 0.00 },
+    "anxiety":        { "neutral": 0.20, "floor": 0.02 },
+    "protectiveness": { "neutral": 0.25, "floor": 0.05 },
+    "contentment":    { "neutral": 0.35, "floor": 0.06 },
+    "elation":        { "neutral": 0.20, "floor": 0.02 },
+    "seeking":        { "neutral": 0.25, "floor": 0.12 },
+    "play":           { "neutral": 0.25, "floor": 0.03 },
+    "dejection":      { "neutral": 0.15, "floor": 0.00 },
+    "irritability":   { "neutral": 0.15, "floor": 0.00 },
+    "fear":           { "neutral": 0.00, "floor": 0.00 }
+  }
+}

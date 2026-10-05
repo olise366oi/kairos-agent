@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 A1batr055 - https://github.com/A1batr055/Drivesoid
+'use strict';
+const fs   = require('fs');
+const path = require('path');
+
+const ROOT    = path.join(__dirname, '..');
+const DATA_DIR = process.env.DRIVES_DATA_DIR || path.join(ROOT, 'data');
+const targets = [
+  path.join(ROOT, 'drives.config.json'),
+  path.join(ROOT, '.env'),
+  DATA_DIR,
+];
+
+for (const t of targets) {
+  if (!fs.existsSync(t)) continue;
+  fs.rmSync(t, { recursive: true, force: true });
+  console.log(`removed: ${path.relative(ROOT, t)}`);
+}
+console.log('Reset complete. Run "npm start" to reconfigure.');

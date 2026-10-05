@@ -1,0 +1,10 @@
+node_modules/
+data/*
+!data/.gitkeep
+drives.config.json
+.env
+!.env.example
+*.log
+.claude/
+lust_plan_review_drivesoid.md
+scripts/sim-out/
