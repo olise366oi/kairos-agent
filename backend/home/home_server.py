@@ -257,6 +257,55 @@ def api_thinking_set(req: ThinkingReq, request: Request):
     return {"enabled": req.enabled}
 
 
+DEFAULT_PERSONA_PATH = Path(__file__).resolve().parent.parent / "data" / "persona_default.md"
+
+
+@app.get("/api/setup/status")
+def get_setup_status(request: Request):
+    _check_token(request)
+    from config import PERSONA_PATH, load_config
+    cfg = load_config() or {}
+    persona = ""
+    if PERSONA_PATH.exists():
+        try:
+            persona = PERSONA_PATH.read_text(encoding="utf-8")
+        except Exception as e:
+            logger.warning("读取 persona 失败: %s", e)
+    default_persona = ""
+    if DEFAULT_PERSONA_PATH.exists():
+        try:
+            default_persona = DEFAULT_PERSONA_PATH.read_text(encoding="utf-8")
+        except Exception as e:
+            logger.warning("读取默认 persona 失败: %s", e)
+    return {
+        "configured": bool(cfg.get("api_key")),
+        "name": cfg.get("name", ""),
+        "has_api_key": bool(cfg.get("api_key")),
+        "persona": persona,
+        "default_persona": default_persona,
+    }
+
+
+@app.post("/api/setup/save")
+async def save_setup(request: Request):
+    _check_token(request)
+    data = await request.json()
+    from config import PERSONA_PATH, load_config, save_config
+    cfg = load_config() or {}
+    name = (data.get("name") or "").strip()
+    api_key = (data.get("api_key") or "").strip()
+    persona = data.get("persona") or ""
+    if name:
+        cfg["name"] = name
+    if api_key:
+        cfg["api_key"] = api_key
+    save_config(cfg)
+    if persona.strip():
+        PERSONA_PATH.parent.mkdir(parents=True, exist_ok=True)
+        PERSONA_PATH.write_text(persona, encoding="utf-8")
+    return {"ok": True}
+
+
 @app.get("/api/home/state")
 def get_state(request: Request):
     _check_token(request)
