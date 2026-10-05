@@ -12,9 +12,14 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from next_match import get_next_match
-from match_fetcher import last_match
-from status_rule import get_status_with_location
+try:
+    from next_match import get_next_match
+    from match_fetcher import last_match
+    from status_rule import get_status_with_location
+    HAS_MATCH_MODULES = True
+except ImportError:
+    get_next_match = last_match = get_status_with_location = None
+    HAS_MATCH_MODULES = False
 from config import TIMEZONE
 
 
@@ -54,7 +59,12 @@ class IeltsSubmitReq(_BM5):
 class ClipSetReq(_BM5):
     type: str
     content: str
-from date_plans_manager import list_plans, visible_plans, review_plan, active_dating_plan
+try:
+    from date_plans_manager import list_plans, visible_plans, review_plan, active_dating_plan
+    HAS_PLANS_MODULES = True
+except ImportError:
+    list_plans = visible_plans = review_plan = active_dating_plan = None
+    HAS_PLANS_MODULES = False
 from pydantic import BaseModel as _BM
 from pydantic import BaseModel as _BM3
 
@@ -85,6 +95,11 @@ class PlanReviewReq(_BM):
     reason: str = ""
 
 logger = logging.getLogger(__name__)
+
+if not HAS_MATCH_MODULES:
+    logger.warning("next_match / match_fetcher / status_rule 模块缺失，看球相关功能不可用")
+if not HAS_PLANS_MODULES:
+    logger.warning("date_plans_manager 模块缺失，约会计划功能不可用")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -249,24 +264,26 @@ def get_state(request: Request):
     roll_if_needed()  # 确保 today.date 是city今天
     state = _load_state()
     if state.get("today"):
-        state["today"]["next_match"] = get_next_match()
-        state["today"]["last_match"] = last_match()
-        state["today"]["companion"] = get_status_with_location()
+        if HAS_MATCH_MODULES:
+            state["today"]["next_match"] = get_next_match()
+            state["today"]["last_match"] = last_match()
+            state["today"]["companion"] = get_status_with_location()
         # next_date：从 plans 里找最近一条已准许的约会
-        from date_plans_manager import list_plans as _lp
-        from datetime import datetime as _dt
-        _now = _dt.now()
-        _upcoming = [p for p in _lp() if p.get("status") == "准许" and p.get("date") >= _now.strftime("%Y-%m-%d")]
-        if _upcoming:
-            _upcoming.sort(key=lambda x: x.get("date", ""))
-            _p = _upcoming[0]
-            _tm = (_p.get("start") or "") + ("-" + _p["end"] if _p.get("end") else "")
-            state["today"]["next_date"] = {
-                "date": _p.get("date", ""),
-                "text": (_tm + " " if _tm else "") + (_p.get("location", "") + " · " if _p.get("location") else "") + _p.get("event", ""),
-            }
+        if HAS_PLANS_MODULES:
+            from date_plans_manager import list_plans as _lp
+            from datetime import datetime as _dt
+            _now = _dt.now()
+            _upcoming = [p for p in _lp() if p.get("status") == "准许" and p.get("date") >= _now.strftime("%Y-%m-%d")]
+            if _upcoming:
+                _upcoming.sort(key=lambda x: x.get("date", ""))
+                _p = _upcoming[0]
+                _tm = (_p.get("start") or "") + ("-" + _p["end"] if _p.get("end") else "")
+                state["today"]["next_date"] = {
+                    "date": _p.get("date", ""),
+                    "text": (_tm + " " if _tm else "") + (_p.get("location", "") + " · " if _p.get("location") else "") + _p.get("event", ""),
+                }
         # 晚上带回：在家 + city时间 19:15 后（他到家了）+ 今天还没带回来。
-        st = state["today"]["companion"]
+        st = state["today"].get("companion") or {}
         if st.get("status") == "在家":
             from datetime import datetime
             from zoneinfo import ZoneInfo
@@ -966,12 +983,16 @@ loadSession();
 @app.get("/api/plans/list")
 def api_plans_list(request: Request):
     _check_token(request)
+    if not HAS_PLANS_MODULES:
+        return {"error": "约会计划功能需要额外配置，当前不可用", "plans": []}
     return {"plans": visible_plans()}
 
 
 @app.post("/api/plans/review")
 def api_plans_review(req: PlanReviewReq, request: Request):
     _check_token(request)
+    if not HAS_PLANS_MODULES:
+        return {"error": "约会计划功能需要额外配置，当前不可用"}
     result = review_plan(req.id, req.decision, req.reason)
     if isinstance(result, str):
         raise HTTPException(status_code=400, detail=result)
