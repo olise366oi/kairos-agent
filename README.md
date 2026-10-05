@@ -155,4 +155,4 @@ export APP_TIMEZONE=Asia/Shanghai
 
 本项目由作者独立完成架构设计、产品定义与工程落地，核心编码通过 AI 辅助完成。
 作者职责范围包括架构决策、成本设计、产品判断、工程收尾与排障迭代。
-详细的设计决策与面试问答，见 [`docs/INTERVIEW_NOTES.md`](./docs/INTERVIEW_NOTES.md)。
+关键设计决策见 [`docs/DESIGN_DECISIONS.md`](./docs/DESIGN_DECISIONS.md)。
