@@ -77,11 +77,13 @@ export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
 # Windows (PowerShell): $env:HOME_TOKEN="<你的随机密钥>"
 # macOS/Linux:          export HOME_TOKEN=<你的随机密钥>
 
-python home/home_server.py   # 移动端 Web
+python run.py   # 移动端 Web（端口 5971，首次打开会弹设置窗口）
 python proactive/runner.py   # 主动触发心跳
 ```
 
-注意：`home_server.py` 依赖若干在公开版中移除的业务模块，直接启动会报 `ModuleNotFoundError`，需自行补齐。
+浏览器打开 http://localhost:5971/home?t=your-secret-token → 首次打开会弹出设置窗口，填称呼 + API Key + 人设即可开始。
+
+注意：看球、约会计划、聊天历史（`chat.history`）等业务模块在公开版中已移除——服务可正常启动（缺失模块自动降级），但对应功能需按 `docs/` 补齐后才可用。
 
 ---
 
