@@ -20,4 +20,5 @@ import uvicorn
 from home.home_server import app
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5971)
+    PORT = int(os.environ.get("PORT", 5971))
+    uvicorn.run(app, host="0.0.0.0", port=PORT)

@@ -78,6 +78,7 @@ export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
 # macOS/Linux:          export HOME_TOKEN=<你的随机密钥>
 
 python run.py   # 移动端 Web（端口 5971，首次打开会弹设置窗口）
+# 如端口冲突，可设置 PORT 环境变量，例如 set PORT=5972
 python proactive/runner.py   # 主动触发心跳
 ```
 

@@ -1,6 +1,12 @@
 import os
+import tempfile
 import sys
 from pathlib import Path
+
+# 创建临时 HOME，隔离 ~/.kairos，防止污染真实配置（必须在 import 前设置）
+_tmp_home = tempfile.mkdtemp(prefix="kairos_test_home_")
+os.environ["HOME"] = _tmp_home
+os.environ["USERPROFILE"] = _tmp_home  # Windows 兼容
 
 # 必须在 import home_server 之前设置，否则 RuntimeError
 os.environ.setdefault("HOME_TOKEN", "test-token-for-pytest")
