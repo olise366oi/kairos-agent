@@ -779,6 +779,11 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
     <button class="btn-ghost btn-sm" onclick="hideFridge()">← 返回</button>
     <h1>冰箱</h1>
   </div>
+  <div style="margin:0.5rem 0;display:flex;gap:6px;align-items:center;">
+    <input id="fridge-add-name" placeholder="添加食材，如：鸡蛋" style="flex:1;min-width:0;padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:var(--card,#fff);color:var(--ink,#000);font-size:14px;">
+    <input id="fridge-add-qty" type="number" value="1" min="1" style="width:4rem;padding:8px 6px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:var(--card,#fff);color:var(--ink,#000);font-size:14px;">
+    <button id="fridge-add-btn" class="btn-sm" onclick="fridgeAdd()">添加</button>
+  </div>
   <div id="fridge-full-list"><div class="empty">加载中…</div></div>
   <div id="fridge-empty" class="empty" style="display:none">冰箱是空的</div>
   <button class="fridge-back btn-ghost" onclick="hideFridge()">返回</button>
@@ -1172,6 +1177,28 @@ async function renderFridgeFull(){
     });
   }catch(e){
     listEl.innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';
+  }
+}
+async function fridgeAdd(){
+  const nameEl=document.getElementById('fridge-add-name');
+  const qtyEl=document.getElementById('fridge-add-qty');
+  const name=(nameEl.value||'').trim();
+  if(!name){alert('请输入食材名称');return;}
+  const qty=parseFloat(qtyEl.value)||1;
+  try{
+    const res=await fetch('/api/home/fridge/add?t='+encodeURIComponent(TOKEN),{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:name,qty:qty})
+    });
+    if(res.status===401){showTokenBox();return;}
+    const data=await res.json();
+    if(!data.ok){alert(data.error||'添加失败');return;}
+    nameEl.value='';
+    qtyEl.value='1';
+    renderFridgeFull();
+  }catch(e){
+    alert('添加失败：'+e.message);
   }
 }
 

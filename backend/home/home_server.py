@@ -690,13 +690,19 @@ def call_page(request: Request):
     _check_token(request)
     # 返回同一个 home.html，前端 JS 检测 URL 决定是否弹来电窗
     from fastapi.responses import FileResponse
-    return FileResponse(r"YOUR_PATH\backend\home\home.html")
+    return FileResponse(Path(__file__).resolve().parent / "home.html")
 
 
 class AteRequest(BaseModel):
     index: int
     eaten_qty: float
     eaten_at: str = ""
+
+
+class FridgeAddRequest(BaseModel):
+    name: str
+    qty: float = 1
+    unit: str = "份"
 
 
 @app.post("/api/home/ate")
@@ -726,6 +732,30 @@ def ate(req: AteRequest, request: Request):
     day["today_events"].append({"time": ts, "text": f"user吃了{req.eaten_qty}{unit}{name}"})
     _save_state(state)
     return {"ok": True, "name": name, "remain": new_qty}
+
+
+@app.post("/api/home/fridge/add")
+def fridge_add(req: FridgeAddRequest, request: Request):
+    _check_token(request)
+    name = (req.name or "").strip()
+    if not name:
+        return {"ok": False, "error": "名称不能为空"}
+    qty = req.qty if req.qty > 0 else 1
+    unit = (req.unit or "份").strip()
+    state = _load_state()
+    if not state.get("today"):
+        state["today"] = {}
+    today = state["today"]
+    fridge = today.setdefault("fridge", [])
+    # 已存在同名则累加数量
+    for item in fridge:
+        if item.get("name") == name:
+            item["qty"] = item.get("qty", 0) + qty
+            _save_state(state)
+            return {"ok": True, "item": item}
+    fridge.append({"name": name, "qty": qty, "unit": unit})
+    _save_state(state)
+    return {"ok": True, "item": {"name": name, "qty": qty, "unit": unit}}
 
 
 @app.get("/api/home/calendar")
@@ -1196,7 +1226,7 @@ def api_watch_chat(req: WatchChatReq, request: Request):
 def watch_page(request: Request):
     _check_token(request)
     from fastapi.responses import FileResponse
-    return FileResponse(r"YOUR_PATH\backend\home\home.html")
+    return FileResponse(Path(__file__).resolve().parent / "home.html")
 
 
 if __name__ == "__main__":

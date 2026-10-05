@@ -9,9 +9,10 @@ state/
 *.db
 *.sqlite
 *.sqlite3
-# 例外：默认 persona 模板属于代码，必须入库
+# 例外：默认 persona 模板与市场库示例属于代码，必须入库
 !backend/data/
 !backend/data/persona_default.md
+!backend/data/market_kb.txt
 
 # Drivesoid 运行时配置与日志
 drives.config.json
