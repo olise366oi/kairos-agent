@@ -40,6 +40,14 @@ Kairos 做的是**主动式**：它维护一套连续的情感状态和角色状
 
 ---
 
+## 界面预览
+
+| 首次设置 | 对话界面 | 设置面板 |
+|---|---|---|
+| ![setup](backend/docs/screenshot-setup.png) | ![chat](backend/docs/screenshot-chat.png) | ![settings](backend/docs/screenshot-state.png) |
+
+---
+
 ## 快速开始
 
 ### 1. 情感引擎（Drivesoid，独立可跑）
