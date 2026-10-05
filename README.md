@@ -23,12 +23,64 @@ Kairos 做的是**主动式**：它维护一套连续的情感状态和角色状
 
 ---
 
+## ⚠️ 关于本仓库（重要）
+
+这是一个**脱敏展示版**，用于展示系统架构与工程能力，**不是可直接部署的生产版本**。
+
+- `backend/home/` 下引用的部分业务模块（赛事抓取、状态规则、聊天历史等）因涉及第三方数据源与个人数据，**已在公开版中移除**；移动端 Web 主链路无法在本仓库内单独启动。
+- `wecom/`（企业微信接入）与 `backend/drivesoid/`（情感引擎）**相对独立，可独立运行**，见下方"快速开始"。
+- 如需完整运行移动端 Web，需自行补齐被移除的模块，接口约定见 `docs/`。
+
+---
+
+## 快速开始
+
+### 1. 情感引擎（Drivesoid，独立可跑）
+
+需要 Node.js ≥ 18。
+
+```bash
+cd backend/drivesoid
+cp .env.example .env   # 按需填入配置
+npm install
+npm start              # REST 服务，默认端口 :24601
+# 或
+npm run mcp            # 以 MCP Server 形式启动
+```
+
+### 2. 企业微信接入（独立可跑）
+
+```bash
+cd wecom
+pip install -r ../backend/requirements.txt
+# 凭据写入 ~/.kairos/wecom_config.json
+#   corp_id / agent_id / secret / token / encoding_aes_key
+python run.py          # 监听 0.0.0.0:8765
+```
+
+### 3. 移动端 Web 与主动触发（需补齐模块后运行）
+
+```bash
+cd backend
+pip install -r requirements.txt
+# LLM 三路 API 配置写入 ~/.kairos/config.json（api_key / base_url / model）
+export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
+
+python home/home_server.py   # 移动端 Web
+python proactive/runner.py   # 主动触发心跳
+```
+
+注意：`home_server.py` 依赖若干在公开版中移除的业务模块，直接启动会报 `ModuleNotFoundError`，需自行补齐。
+
+---
+
 ## 项目规模
 
 - **Python 7,677 行 / 46 文件**，**JavaScript 2,163 行 / 9 文件**（不含依赖与生成物）
 - 核心后端模块 **45 个**，FastAPI 路由 **52 条**（21 GET / 31 POST）
 - RAG 知识库 **7 类**，MCP 工具 **3 个**（情感引擎服务端）
 - 三端入口（移动 Web / 企微 / 桌面），情感引擎独立进程（REST + MCP 双协议）
+- 开发周期：2026年9月13日 – 9月24日，独立开发。
 
 ---
 
@@ -85,6 +137,8 @@ Kairos 做的是**主动式**：它维护一套连续的情感状态和角色状
 
 **工程难点在于"克制"**：主动性做过头就是骚扰。系统实现了可用性门控——睡觉 / 比赛 / 会议场景直接拦截，训练间隙允许短回复，连续未回触发安抚兜底而非追加推送。
 
+**实测数据**（来自本地 `proactive/state/`）：66 次念头评估中，仅 23 次判定"开口"（`spoken=True`），**43 次主动沉默，沉默率 65%**。系统真正做的是"决定不打扰"，而不是"找机会说话"。
+
 ### 2. 多模型成本路由：让请求量翻倍而成本不失控
 
 主动触发意味着请求量是被动模式的数倍。系统实现了三层路由（`backend/config.py`）：
@@ -95,15 +149,19 @@ Kairos 做的是**主动式**：它维护一套连续的情感状态和角色状
 
 配合 **RAG 按需检索**（关键词命中才注入知识片段，日常闲聊完全不检索）+ 30 分钟天气缓存 + 思考链长度上限，在保证体验的前提下控制单次请求成本。
 
+**实测数据**（`backend/logs/usage.log`，2026-09-18 → 09-27，9 天 704 次调用）：**91.8% 的调用落在闲时资源，闲时段 token 占 93.6%**（峰段 8.2% 调用 / 6.4% token）。主动触发带来的增量请求，绝大部分被路由到了低价资源池。
+
 ### 3. 连续情感引擎（独立 Node.js 服务）
 
 不是让 LLM"扮演"情绪，而是让情绪成为一个**独立进程里的可查询状态**（`backend/drivesoid/`，端口 24601）：
 
-- 维护 longing / intimacy / vitality / jealousy / anxiety / contentment 等**多维连续值**
+- 维护 **16 维连续值**（longing / intimacy / vitality / jealousy / anxiety / contentment / elation / possessiveness 等），每维带独立的时间常数、峰值时刻与振幅参数
 - 主对话循环周期性拉取情感上下文注入系统提示，聊天中的情感变化回写
 - 双入口设计：REST API + MCP 服务，既可被 Python 调用，也可被其他 MCP 客户端消费
 
 **架构意义**：把"情感"从 prompt 里的一次性文本，变成可持久化、可观测、可测试的状态机。配套 Python 心跳引擎（`companion_awakening/`）负责生成"念头"。
+
+**实测数据**：**累积 6,541 条状态快照**，每条含完整 16 维取值，可供回溯、可视化与调参。两套情感状态（Node 引擎 16 维 / Python 念头引擎 8 字段）通过映射同步。
 
 ### 4. 移动端工程化与三端一致
 
@@ -117,29 +175,7 @@ Kairos 做的是**主动式**：它维护一套连续的情感状态和角色状
 
 三端共用同一 SQLite 聊天历史与状态文件，回复与状态实时一致。
 
----
-
-## 快速开始
-
-```bash
-# 1. Python 依赖
-cd backend && pip install -r requirements.txt
-
-# 2. 配置（首次运行生成模板）
-#    ~/.kairos/config.json    LLM API Key / base_url / model
-#    wecom/wecom_config.json   企业微信自建应用凭据
-
-# 3. 启动三个进程
-python home/home_server.py    # 移动端 Web
-python proactive/runner.py    # 主动触发心跳
-python ../wecom/run.py        # 企业微信回调
-
-# 4. 可选：情感引擎
-cd backend/drivesoid && npm install && npm start   # :24601
-
-# 5. 时区（任意 IANA，默认 UTC）
-export APP_TIMEZONE=Asia/Shanghai
-```
+**实测规模**：移动端 Web 聊天库累积 463 条消息，其中 70 条带思考链；企微去重消息 ID 248 条。三端状态实时一致，无跨端穿帮。
 
 ---
 
