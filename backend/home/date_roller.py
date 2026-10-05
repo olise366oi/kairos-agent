@@ -4,12 +4,12 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 from config import TIMEZONE
 
-STATE_PATH = Path(r"./data\home_state.json")
+STATE_PATH = Path("./data/home_state.json")
 APP_TZ = ZoneInfo(TIMEZONE)
 
 
 def home_today() -> str:
-    return datetime.now(PARIS_TZ).strftime("%Y-%m-%d")
+    return datetime.now(APP_TZ).strftime("%Y-%m-%d")
 
 
 def roll_if_needed():
