@@ -14,7 +14,10 @@ from pathlib import Path
 STATE_PATH = Path(r"./data\watch_state.json")
 LEAGUE_ID = 3614399544      # France Ligue 1
 PSG_TEAM_ID = 3976425434    # PSG
-LINK = "https://foreverlove.tunnel.YOUR_DOMAIN/watch?t=kairos_home_2026"
+HOME_TOKEN = os.environ.get("HOME_TOKEN")
+if not HOME_TOKEN:
+    raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
+LINK = f"https://foreverlove.tunnel.YOUR_DOMAIN/watch?t={HOME_TOKEN}"
 
 
 def _load_api_key() -> str:

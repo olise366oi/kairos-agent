@@ -2,13 +2,16 @@
 """电话状态机：companion/user发起呼叫、接听、拒接、挂断。
 状态存 ./data/call_state.json，网页 /call 页面轮询状态来显示来电窗。
 """
+import os
 import json
 from pathlib import Path
 from datetime import datetime, timezone
 
 CALL_STATE_PATH = Path(r"./data\call_state.json")
 TUNGO_BASE = "https://foreverlove.tunnel.YOUR_DOMAIN"
-HOME_TOKEN = "kairos_home_2026"
+HOME_TOKEN = os.environ.get("HOME_TOKEN")
+if not HOME_TOKEN:
+    raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
 
 
 def _load():

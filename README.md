@@ -72,6 +72,10 @@ cd backend
 pip install -r requirements.txt
 # LLM 三路 API 配置写入 ~/.kairos/config.json（api_key / base_url / model）
 export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
+# 必须设置 HOME_TOKEN，否则后端启动会直接报错
+# Windows (cmd):        set HOME_TOKEN=<你的随机密钥>
+# Windows (PowerShell): $env:HOME_TOKEN="<你的随机密钥>"
+# macOS/Linux:          export HOME_TOKEN=<你的随机密钥>
 
 python home/home_server.py   # 移动端 Web
 python proactive/runner.py   # 主动触发心跳

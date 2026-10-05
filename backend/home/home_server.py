@@ -1,4 +1,6 @@
+import hmac
 import json
+import os
 import re as _re
 import threading
 import urllib.request
@@ -83,7 +85,9 @@ class PlanReviewReq(_BM):
 
 STATE_PATH = Path(r"./data\home_state.json")
 CONFIG_PATH = Path(r"./data\config.json")
-HOME_TOKEN = "kairos_home_2026"
+HOME_TOKEN = os.environ.get("HOME_TOKEN")
+if not HOME_TOKEN:
+    raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
 HTML_PATH = Path(__file__).parent / "home.html"
 ASSETS_DIR = Path(__file__).parent / "assets"
 
@@ -105,8 +109,8 @@ def _save_state(state):
 
 
 def _check_token(request: Request):
-    token = request.query_params.get("t") or request.headers.get("X-Home-Token")
-    if token != HOME_TOKEN:
+    token = request.query_params.get("t") or request.headers.get("X-Home-Token", "")
+    if not hmac.compare_digest(token, HOME_TOKEN):
         raise HTTPException(status_code=401, detail="unauthorized")
 
 
@@ -849,7 +853,7 @@ html,body{margin:0;padding:0;min-height:100%;background:#f5f5f5;color:#222;font-
   <button id="submitBtn" onclick="submitAll()">提交批改</button>
 </div>
 <script>
-const TOKEN = new URLSearchParams(location.search).get('t') || 'kairos_home_2026';
+const TOKEN = new URLSearchParams(location.search).get('t') || '';
 let state = null;
 
 async function api(path, opts={}) {
