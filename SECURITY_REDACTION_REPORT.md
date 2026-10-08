@@ -87,3 +87,23 @@
 | Git 工作区检查 | 干净；无 `.env` / `*.db` / `*.log` / `__pycache__` / `node_modules` 混入 |
 
 说明：以上数值为本次报告撰写时对仓库实际执行所得，非预设值；后续若新增文件需重跑同口径扫描。
+
+## 5. 迭代脱敏记录
+
+脱敏不是一次性操作。首轮脱敏后，在后续全仓审查与工程化改造中又发现并修复了以下漏网项：
+
+| 漏网项 | 位置 | 修复方式 |
+| --- | --- | --- |
+| 拼音残留 `ringing_from_rin / ringing_from_asu` | `call_manager.py` + 前端 JS | 改为 `ringing_from_companion / ringing_from_user` |
+| 真名 `Olise` / `Olise_Tu` | `home.html` 朋友圈显示名 + MOMENT 文案 | 改为 `user` |
+| 球员名映射表 `NAME_MAP`（含姆巴佩 / 哈兰德等） | `home.html` 行程卡片渲染 JS | 随行程卡片删除一并清除 |
+| 剧情账号 `@companion_ltoshi` / `@Olise_Tu` | `home.html` MOMENT 文案 | 删除账号提及，剧情文案中性化 |
+| 脱敏占位死路径 `YOUR_PATH` | 约 50 处 `sys.path.insert` + 5 处活代码路径 | 死代码删除（run.py 已注入真实路径），活代码改为 `Path(__file__)` 动态路径 |
+| 反斜杠路径 `Path(r"./data\...")` | 19 处 + 后续审查再发现 5 处 | 统一改为正斜杠（跨平台兼容） |
+| 隧道名 `foreverlove.tunnel` | `call_manager.py` / `watch_manager.py` | 改为环境变量 + 占位默认值 `https://your-tunnel.example.com` |
+| 硬编码 `HOME_TOKEN = "kairos_home_2026"` | `home_server.py` | 改为 `os.environ.get("HOME_TOKEN")` + 启动检查 + `hmac.compare_digest` |
+| 法语球队 / 城市关键词 | `loop.py` `SCHEDULE_KEYWORDS` | 具体队名整行删除，保留通用足球词 |
+| 半脱敏重复词 `companion（companion）` | `loop.py` retry_system prompt | 重写为中性角色兜底 prompt |
+
+这些修复已全部合入仓库，最终 `grep` 确认 0 残留。说明脱敏是迭代收敛过程：首轮批量替换后，仍需结合运行时审查、代码走读与真实使用场景二次清理。
+

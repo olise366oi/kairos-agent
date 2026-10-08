@@ -178,7 +178,7 @@ flowchart TD
 
 ### 4. 移动端工程化与三端一致
 
-`home_server.py`（FastAPI）提供移动端 Web，包含聊天、来电、朋友圈、日记、日历、冰箱、看球复盘、约会计划等模块。真正的坑在 **iOS Safari**：
+`home_server.py`（FastAPI）提供移动端 Web，包含聊天、来电、朋友圈、日记、日历、冰箱等模块，另含看球复盘（独立路由 `/watch`，需自行配置 MCP 数据源与 API Key）与约会计划（`date_plans_manager`，公开版已降级为不可用）。真正的坑在 **iOS Safari**：
 
 - `position:fixed` + `100vh` 规避地址栏伸缩导致的视口跳动与软键盘顶起错位
 - `-webkit-backdrop-filter` 双写兼容毛玻璃
