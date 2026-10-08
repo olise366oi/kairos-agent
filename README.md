@@ -10,63 +10,6 @@
 
 ![界面预览](backend/docs/screenshot-chat.png)
 
-
-## 界面预览
-
-| 首次设置 | 对话界面 | 设置面板 |
-|---|---|---|
-| ![setup](backend/docs/screenshot-setup.png) | ![chat](backend/docs/screenshot-chat.png) | ![settings](backend/docs/screenshot-state.png) |
-
----
-
-## 快速开始
-
-### 1. 情感引擎（Drivesoid，独立可跑）
-
-需要 Node.js ≥ 18。
-
-```bash
-cd backend/drivesoid
-cp .env.example .env   # 按需填入配置
-npm install
-npm start              # REST 服务，默认端口 :24601
-# 或
-npm run mcp            # 以 MCP Server 形式启动
-```
-
-### 2. 企业微信接入（独立可跑）
-
-```bash
-cd wecom
-pip install -r ../backend/requirements.txt
-# 凭据写入 ~/.kairos/wecom_config.json
-#   corp_id / agent_id / secret / token / encoding_aes_key
-python run.py          # 监听 0.0.0.0:8765
-```
-
-### 3. 移动端 Web 与主动触发（需补齐模块后运行）
-
-```bash
-cd backend
-pip install -r requirements.txt
-# LLM 三路 API 配置写入 ~/.kairos/config.json（api_key / base_url / model）
-export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
-# 必须设置 HOME_TOKEN，否则后端启动会直接报错
-# Windows (cmd):        set HOME_TOKEN=<你的随机密钥>
-# Windows (PowerShell): $env:HOME_TOKEN="<你的随机密钥>"
-# macOS/Linux:          export HOME_TOKEN=<你的随机密钥>
-
-python run.py   # 移动端 Web（端口 5971，首次打开会弹设置窗口）
-# 如端口冲突，可设置 PORT 环境变量，例如 set PORT=5972
-python proactive/runner.py   # 主动触发心跳
-```
-
-浏览器打开 http://localhost:5971/home?t=your-secret-token → 首次打开会弹出设置窗口，填称呼 + API Key + 人设即可开始。
-
-注意：看球、约会计划、聊天历史（`chat.history`）等业务模块在公开版中已移除——服务可正常启动（缺失模块自动降级），但对应功能需按 `docs/` 补齐后才可用。
-
-可编辑 `backend/data/market_kb.txt` 自定义市场库（格式：`=== 分类 ===` 后跟 `- 商品名`），冰箱补货与"买了什么"匹配以此为数据源。
-
 ---
 
 ## 项目规模
@@ -76,68 +19,6 @@ python proactive/runner.py   # 主动触发心跳
 - RAG 知识库 **7 类**，MCP 工具 **3 个**（情感引擎服务端）
 - 三端入口（移动 Web / 企微 / 桌面），情感引擎独立进程（REST + MCP 双协议）
 - 开发周期：2026年9月13日 – 9月24日，独立开发。
-
----
-
-## 系统能力
-
-| 能力 | 说明 |
-| --- | --- |
-| 🧠 长周期记忆 | ChromaDB 向量检索 + 多知识库按需注入，7 类知识域 |
-| 💓 连续情感状态 | 独立 Node.js 情感引擎，多维情感向量，聊天 ↔ 状态双向闭环 |
-| ⏰ 主动触发 | 心跳循环 + 场景上下文拼装，Agent 自主决定推送 / 记录 / 沉默 |
-| 🔀 多渠道成本控制 | 双路 API 池（DeepSeek 官方 + 火山方舟，同一模型），配额耗尽自动回退 |
-| 📱 三端一致 | 移动端 Web / 企业微信 / 桌面悬浮球共用同一状态层 |
-| 🔌 外部集成 | MCP 协议接入赛事数据，Open-Meteo 天气，企业微信推送 |
-
----
-
-## 架构
-
-```mermaid
-flowchart TD
-    U["用户<br/>移动端 Web / 企业微信 / 桌面悬浮球"]
-    subgraph L1["交互层"]
-        HS["home_server<br/>FastAPI 单页应用"]
-        WC["wecom<br/>回调服务"]
-    end
-    subgraph L2["Agent 层"]
-        LP["loop.py<br/>主对话循环"]
-        PR["proactive/runner.py<br/>心跳循环"]
-    end
-    subgraph L3["能力层"]
-        RAG["RAG 按需检索<br/>ChromaDB"]
-        DE["情感引擎<br/>Drivesoid"]
-        SM["状态机<br/>SQLite / JSON"]
-        RT["多渠道成本控制<br/>双路 API 池"]
-    end
-    subgraph L4["数据层"]
-        DB["SQLite + PostgreSQL"]
-        KB["知识库文本"]
-        EXT["企业微信 / 赛事 / 天气 API<br/>MCP 接入"]
-    end
-    U --> HS
-    U --> WC
-    HS --> LP
-    WC --> LP
-    LP --> RAG
-    LP --> DE
-    LP --> SM
-    LP --> RT
-    PR --> DE
-    PR --> SM
-    PR --> RT
-    RAG --> KB
-    SM --> DB
-    DE --> SM
-    LP --> EXT
-    PR --> EXT
-```
-
-- **数据层**：SQLite + PostgreSQL (Supabase)——热数据本地化（聊天历史、状态 JSON 单机零运维），云侧做知识库与备份。
-- **AI 层**：RAG 按需检索（关键词命中才注入）/ 情感引擎（独立进程多维状态）/ Agent 主动触发（心跳循环）/ 多渠道成本控制（双路 API 池 + 配额回退）。
-- **集成层**：MCP 协议（stdio JSON-RPC）/ 企业微信推送 / 内网穿透。
-- **交互层**：移动端 Web（FastAPI 单页）/ 多页面 / 桌面悬浮球（Electron）。
 
 ---
 
@@ -192,6 +73,69 @@ flowchart TD
 
 **实测规模**：移动端 Web 聊天库累积 463 条消息，其中 70 条带思考链；企微去重消息 ID 248 条。三端状态实时一致，无跨端穿帮。
 
+
+---
+
+## 架构
+
+```mermaid
+flowchart TD
+    U["用户<br/>移动端 Web / 企业微信 / 桌面悬浮球"]
+    subgraph L1["交互层"]
+        HS["home_server<br/>FastAPI 单页应用"]
+        WC["wecom<br/>回调服务"]
+    end
+    subgraph L2["Agent 层"]
+        LP["loop.py<br/>主对话循环"]
+        PR["proactive/runner.py<br/>心跳循环"]
+    end
+    subgraph L3["能力层"]
+        RAG["RAG 按需检索<br/>ChromaDB"]
+        DE["情感引擎<br/>Drivesoid"]
+        SM["状态机<br/>SQLite / JSON"]
+        RT["多渠道成本控制<br/>双路 API 池"]
+    end
+    subgraph L4["数据层"]
+        DB["SQLite + PostgreSQL"]
+        KB["知识库文本"]
+        EXT["企业微信 / 赛事 / 天气 API<br/>MCP 接入"]
+    end
+    U --> HS
+    U --> WC
+    HS --> LP
+    WC --> LP
+    LP --> RAG
+    LP --> DE
+    LP --> SM
+    LP --> RT
+    PR --> DE
+    PR --> SM
+    PR --> RT
+    RAG --> KB
+    SM --> DB
+    DE --> SM
+    LP --> EXT
+    PR --> EXT
+```
+
+- **数据层**：SQLite + PostgreSQL (Supabase)——热数据本地化（聊天历史、状态 JSON 单机零运维），云侧做知识库与备份。
+- **AI 层**：RAG 按需检索（关键词命中才注入）/ 情感引擎（独立进程多维状态）/ Agent 主动触发（心跳循环）/ 多渠道成本控制（双路 API 池 + 配额回退）。
+- **集成层**：MCP 协议（stdio JSON-RPC）/ 企业微信推送 / 内网穿透。
+- **交互层**：移动端 Web（FastAPI 单页）/ 多页面 / 桌面悬浮球（Electron）。
+
+---
+
+## 系统能力
+
+| 能力 | 说明 |
+| --- | --- |
+| 🧠 长周期记忆 | ChromaDB 向量检索 + 多知识库按需注入，7 类知识域 |
+| 💓 连续情感状态 | 独立 Node.js 情感引擎，多维情感向量，聊天 ↔ 状态双向闭环 |
+| ⏰ 主动触发 | 心跳循环 + 场景上下文拼装，Agent 自主决定推送 / 记录 / 沉默 |
+| 🔀 多渠道成本控制 | 双路 API 池（DeepSeek 官方 + 火山方舟，同一模型），配额耗尽自动回退 |
+| 📱 三端一致 | 移动端 Web / 企业微信 / 桌面悬浮球共用同一状态层 |
+| 🔌 外部集成 | MCP 协议接入赛事数据，Open-Meteo 天气，企业微信推送 |
+
 ---
 
 ## 限制与反思
@@ -209,11 +153,55 @@ flowchart TD
 
 ---
 
-## 第三方组件与许可
+## 快速开始
 
-- 本仓库原创代码以 **MIT** 许可开源（见根目录 `LICENSE`，Copyright (c) 2026 Kairos Project）。
-- `backend/drivesoid/` 为**独立开源组件**（情感引擎），遵循其自带 **CC-BY-NC-SA-4.0** 许可（见 `backend/drivesoid/LICENSE`）。
-- 商用场景建议将情感引擎替换为自研实现——架构已解耦（REST + MCP 双入口），替换不影响主链路。
+### 1. 情感引擎（Drivesoid，独立可跑）
+
+需要 Node.js ≥ 18。
+
+```bash
+cd backend/drivesoid
+cp .env.example .env   # 按需填入配置
+npm install
+npm start              # REST 服务，默认端口 :24601
+# 或
+npm run mcp            # 以 MCP Server 形式启动
+```
+
+### 2. 企业微信接入（独立可跑）
+
+```bash
+cd wecom
+pip install -r ../backend/requirements.txt
+# 凭据写入 ~/.kairos/wecom_config.json
+#   corp_id / agent_id / secret / token / encoding_aes_key
+python run.py          # 监听 0.0.0.0:8765
+```
+
+### 3. 移动端 Web 与主动触发（需补齐模块后运行）
+
+```bash
+cd backend
+pip install -r requirements.txt
+# LLM 三路 API 配置写入 ~/.kairos/config.json（api_key / base_url / model）
+export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
+# 必须设置 HOME_TOKEN，否则后端启动会直接报错
+# Windows (cmd):        set HOME_TOKEN=<你的随机密钥>
+# Windows (PowerShell): $env:HOME_TOKEN="<你的随机密钥>"
+# macOS/Linux:          export HOME_TOKEN=<你的随机密钥>
+
+python run.py   # 移动端 Web（端口 5971，首次打开会弹设置窗口）
+# 如端口冲突，可设置 PORT 环境变量，例如 set PORT=5972
+python proactive/runner.py   # 主动触发心跳
+```
+
+浏览器打开 http://localhost:5971/home?t=your-secret-token → 首次打开会弹出设置窗口，填称呼 + API Key + 人设即可开始。
+
+注意：看球、约会计划、聊天历史（`chat.history`）等业务模块在公开版中已移除——服务可正常启动（缺失模块自动降级），但对应功能需按 `docs/` 补齐后才可用。
+
+可编辑 `backend/data/market_kb.txt` 自定义市场库（格式：`=== 分类 ===` 后跟 `- 商品名`），冰箱补货与"买了什么"匹配以此为数据源。
+
+---
 
 ## 测试
 
@@ -225,3 +213,11 @@ python -m pytest tests/ -v
 
 测试使用临时 HOME 目录隔离，不会污染你的 `~/.kairos/` 配置。
 测试在 Python 3.14.7 + pytest 9.1.1 下验证通过（6 passed）。生产依赖锁版本见 requirements.txt，如遇版本兼容问题请以锁版为准。
+
+---
+
+## 第三方组件与许可
+
+- 本仓库原创代码以 **MIT** 许可开源（见根目录 `LICENSE`，Copyright (c) 2026 Kairos Project）。
+- `backend/drivesoid/` 为**独立开源组件**（情感引擎），遵循其自带 **CC-BY-NC-SA-4.0** 许可（见 `backend/drivesoid/LICENSE`）。
+- 商用场景建议将情感引擎替换为自研实现——架构已解耦（REST + MCP 双入口），替换不影响主链路。
