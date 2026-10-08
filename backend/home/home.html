@@ -21,7 +21,7 @@
   --muted:#94a3b8;
   --danger:#e53e3e;
   --success:#38a169;
-  --chat-bg:#1a202c;
+  --chat-bg:#f5f7fa;
   --chat-bubble-user:#4a6fa5;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -237,20 +237,26 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
 /* ===== 聊天记录（iMessage 实色气泡） ===== */
 #chat-window .modal-body{
   position:relative;overflow:hidden;background:var(--chat-bg);
-  width:100%;max-width:100%;height:100vh;max-height:100vh;border-radius:18px 18px 0 0;
+  width:100%;max-width:100%;height:100vh;max-height:100vh;border-radius:0;
   display:flex;flex-direction:column;padding:0;text-align:left;box-shadow:none;
   border-top:1px solid var(--line);
 }
 #chat-window .modal-body::before{
-  content:"";position:absolute;inset:0;z-index:0;
-  background:var(--lily) center/cover no-repeat;filter:brightness(.72) saturate(1.05);
+  content:"";position:absolute;inset:0;z-index:0;display:none;
 }
 #chat-window .modal-body>*{position:relative;z-index:1;}
 #chat-window .msg-row.user .msg{background:var(--chat-bubble-user);color:#fff;border-radius:18px;-webkit-backdrop-filter:none;backdrop-filter:none;}
 #chat-window .msg-row.user .msg::after{display:none;}
-#chat-window .msg-row.companion .msg{background:rgba(120,120,128,.20);color:#fff;border-radius:18px;-webkit-backdrop-filter:blur(20px) saturate(1.8);backdrop-filter:blur(20px) saturate(1.8);border:1px solid rgba(255,255,255,.12);}
+#chat-window .msg-row.companion .msg{background:#fff;color:var(--ink);border-radius:18px;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);box-shadow:none;}
 #chat-window .msg-row.companion .msg::after{display:none;}
-#chat-window .date-sep span{background:rgba(120,120,128,.45);color:#fff;-webkit-backdrop-filter:none;backdrop-filter:none;}
+#chat-window .date-sep span{background:var(--line);color:var(--muted);-webkit-backdrop-filter:none;backdrop-filter:none;}
+#chat-window .ct-title{color:var(--ink);}
+#chat-window .ct-back,#chat-window .ct-facetime{background:var(--card);color:var(--ink);border:1px solid var(--line);}
+#chat-window .call-input{background:var(--chat-bg);border-top:1px solid var(--line);}
+#chat-window .call-input textarea{background:#fff;border:1px solid var(--line);color:var(--ink);}
+#chat-window .call-input textarea::placeholder{color:var(--muted);}
+#chat-window .ci-plus{background:var(--card);color:var(--ink);border:1px solid var(--line);}
+#chat-window .ci-send{background:var(--accent);}
 /* ===== 朋友圈 v7（封面横幅 + 内容区） ===== */
 /* ---- 主界面 ---- */
 .moments-page{display:none;position:fixed;inset:0;z-index:40;flex-direction:column;background:url(/assets/moments_cover.jpg) center/cover no-repeat;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
@@ -509,7 +515,6 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
 </style>
 </head>
 <body>
-<a href="/clip" id="clip-entry" style="position:fixed;top:14px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;">📋</a>
 <button id="setup-btn" title="设置" onclick="openSetupModal()" style="position:fixed;top:94px;right:14px;z-index:20;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border:none;">⚙️</button>
 <header>
   <h1>Welcome come back,<br>MY COMPANION.</h1>
@@ -531,18 +536,8 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
     </div>
   </div>
 
-  <div class="card"><h2><span class="icon">📅</span>下一项行程</h2>
-    <div class="row"><span class="item-name" id="match-text">待定</span></div>
-  </div>
 
-  <div class="card"><h2><span class="icon">📅</span>上一项行程</h2>
-    <div class="row"><span class="item-name" id="lastmatch-text">还没有记录</span></div>
-    <div class="row"><span class="item-name" id="lastmatch-goal"></span></div>
-    <div class="row"><span class="item-name" id="lastmatch-assist"></span></div>
-    <div class="row"><span class="item-name" id="lastmatch-injury"></span></div>
-  </div>
-
-  <div class="card"><h2><span class="icon">🍳</span>今天给伴侣大人做的早餐</h2>
+  <div class="card"><h2><span class="icon">🍳</span>今天给伴侣做的早餐</h2>
     <div id="breakfast-main"></div>
     <div id="breakfast-fruit"></div>
     <div id="breakfast-drink"></div>
@@ -865,7 +860,6 @@ let currentIndex=-1;
   const t=new URLSearchParams(location.search).get('t');
   if(t){TOKEN=t;localStorage.setItem('home_token',t);}
   if(!TOKEN){showTokenBox();return;}
-  document.querySelector('#clip-entry').href='/clip?t='+TOKEN;
   if(location.pathname==='/watch'){initWatch();return;}
   checkFirstRun();
   loadState();
@@ -1028,36 +1022,6 @@ function render(state){
   const _st=(today.companion&&today.companion.status)?today.companion.status:'—';
   document.getElementById('companion-location').innerHTML=_loc+'&nbsp;&nbsp;'+_st;
 
-  const m=today.next_match||{};
-  const parts=[];
-  if(m.date)parts.push(fmtDate(m.date));
-  if(m.time)parts.push(m.time);
-  if(m.opponent)parts.push(m.opponent);
-  document.getElementById('match-text').textContent=parts.length?parts.join('  '):'待定';
-
-  const lm=today.last_match||{};
-  const lmp=[];
-  if(lm.date)lmp.push(fmtDate(lm.date));
-  if(lm.venue)lmp.push(lm.venue==='主场'?'主场':(lm.venue==='客场'?'客场':''));
-  if(lm.fixture)lmp.push(lm.fixture);
-  if(lm.score)lmp.push(lm.score+(lm.result?('（'+lm.result+'）'):''));
-  if(lm.extra_time)lmp.push(lm.extra_time);
-  document.getElementById('lastmatch-text').textContent=lmp.length?lmp.join('  '):'还没有记录';
-  const NAME_MAP={'姆巴佩':'Kylian Mbappé','奥利塞':'Michael Olise','费兰·托雷斯':'Ferran Torres','登贝莱':'Ousmane Dembélé','巴尔科拉':'Bradley Barcola','马尔基尼奥斯':'Marquinhos','安赫尔·戈梅斯':'Angel Gomes','杜埃':'Désiré Doué','克瓦拉茨赫利亚':'Khvicha Kvaratskhelia','维尼修斯':'Vinícius Júnior','哈兰德':'Erling Haaland','莱万':'Robert Lewandowski','凯恩':'Harry Kane','萨拉赫':'Mohamed Salah','穆阿尼':'Randal Kolo Muani','贡萨洛':'Gonçalo Ramos','阿森西奥':'Marco Asensio','维阿':'Timothy Weah','恰克尔':'Uğurcan Çakır'};
-  const latinName=n=>NAME_MAP[n]||n;
-  const lg=lm.scorers||[];
-  const goalTxt=lg.map(g=>{
-    if(lm.companion_scored&&lm.companion_rewrote&&g.name===lm.companion_rewrote)return 'companion'+(g.minute?(' '+g.minute):'');
-    return latinName(g.name)+(g.minute?(' '+g.minute):'');
-  }).join('、');
-  document.getElementById('lastmatch-goal').textContent=goalTxt?('进球：'+goalTxt):'';
-  const la=lm.assists||[];
-  const assistTxt=la.map(a=>{
-    if(lm.companion_assist&&lm.companion_assist_rewrote&&a.name===lm.companion_assist_rewrote)return 'companion'+(a.minute?(' '+a.minute):'');
-    return latinName(a.name)+(a.minute?(' '+a.minute):'');
-  }).join('、');
-  document.getElementById('lastmatch-assist').textContent=assistTxt?('助攻：'+assistTxt):'';
-  document.getElementById('lastmatch-injury').textContent=lm.partner_injury?('companion伤情：'+lm.partner_injury):'';
 
   const bf=today.breakfast||{};
   document.getElementById('breakfast-main').textContent=bf.main||'';

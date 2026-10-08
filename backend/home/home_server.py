@@ -40,13 +40,6 @@ from call_manager import (
 )
 from moments_manager import list_posts, add_post, like_post, comment_post
 from diary_manager import list_entries, add_entry, has_today, archive_current, list_archive
-from clipboard_manager import get_clip, set_text, set_image, clear_clip
-from pydantic import BaseModel as _BM5
-
-
-class ClipSetReq(_BM5):
-    type: str
-    content: str
 try:
     from date_plans_manager import list_plans, visible_plans, review_plan, active_dating_plan
     HAS_PLANS_MODULES = True
@@ -838,41 +831,6 @@ def api_diary_archive(request: Request):
     return {"batches": list_archive()}
 
 
-@app.get("/api/clip/get")
-def api_clip_get(request: Request):
-    _check_token(request)
-    return get_clip()
-
-@app.post("/api/clip/set")
-def api_clip_set(req: ClipSetReq, request: Request):
-    _check_token(request)
-    if req.type == "image":
-        set_image(req.content)
-    else:
-        set_text(req.content)
-    return {"ok": True}
-
-@app.post("/api/clip/clear")
-def api_clip_clear(request: Request):
-    _check_token(request)
-    clear_clip()
-    return {"ok": True}
-
-@app.get("/api/clip/image")
-def api_clip_image(request: Request):
-    _check_token(request)
-    from fastapi.responses import FileResponse
-    p = r"./data\clipboard_image.png"
-    if not Path(p).exists():
-        raise HTTPException(status_code=404, detail="no image")
-    return FileResponse(p)
-
-@app.get("/clip")
-def clip_page(request: Request):
-    _check_token(request)
-    from fastapi.responses import HTMLResponse
-    html = open(r"YOUR_PATH\backend\home\clip_page.html", encoding="utf-8").read()
-    return HTMLResponse(html.replace("TOKEN", HOME_TOKEN))
 
 
 # ---------- 约会计划 ----------
