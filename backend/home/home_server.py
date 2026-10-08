@@ -345,10 +345,6 @@ def _gen_first_line_async():
     def worker():
         try:
             import sys as _sys
-            if r"YOUR_PATH\backend" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend")
-            if r"YOUR_PATH\backend\agent" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\agent")
             from chat.history import save_message
             from loop import chat as loop_chat, llm_api_key
             from datetime import datetime as _dt, timezone as _tz, timedelta as _td
@@ -425,8 +421,6 @@ def api_call_hangup(req: CallEndReq, request: Request):
     # 写进聊天历史：代码显示的「通话结束」，不触发回复；模型读上下文时能看到通话已结束
     try:
         import sys as _sys
-        if r"YOUR_PATH\backend" not in _sys.path:
-            _sys.path.insert(0, r"YOUR_PATH\backend")
         from chat.history import save_message
         if req.duration:
             save_message("user", f"（通话结束，时长 {req.duration}）")
@@ -437,8 +431,6 @@ def api_call_hangup(req: CallEndReq, request: Request):
     if req.duration:
         try:
             import sys as _sys
-            if r"YOUR_PATH" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH")
             from wecom.push import push_reply_to_wecom
             push_reply_to_wecom(f"通话结束，时长 {req.duration}")
         except Exception as e:
@@ -470,8 +462,6 @@ def api_call_chat(req: CallChatReq, request: Request):
     _check_token(request)
     # 调 loop.chat() 生成回复
     import sys as _sys
-    _sys.path.insert(0, r"YOUR_PATH\backend")
-    _sys.path.insert(0, r"YOUR_PATH\backend\agent")
     from loop import chat as loop_chat, load_config, llm_api_key
     api_key = llm_api_key()  # 峰谷切换
     # 通话场景的 system 提示由 loop.py 内部处理；这里直接调
@@ -494,8 +484,6 @@ def api_call_chat(req: CallChatReq, request: Request):
 def api_home_chat_history(request: Request):
     _check_token(request)
     import sys as _sys
-    _sys.path.insert(0, r"YOUR_PATH\backend")
-    _sys.path.insert(0, r"YOUR_PATH\backend\chat")
     from chat.history import get_history
     # 网页端显示 = 归档历史（清记忆前导出，后台不再参与记忆） + 当前新对话
     archive = []
@@ -514,8 +502,6 @@ def api_home_chat_history(request: Request):
 def api_home_chat(req: CallChatReq, request: Request):
     _check_token(request)
     import sys as _sys
-    _sys.path.insert(0, r"YOUR_PATH\backend")
-    _sys.path.insert(0, r"YOUR_PATH\backend\agent")
     from loop import chat as loop_chat, llm_api_key
     from chat.history import save_message
     api_key = llm_api_key()  # 峰谷切换
@@ -535,7 +521,6 @@ def api_home_chat(req: CallChatReq, request: Request):
     if call_now:
         try:
             import sys as _cs
-            _cs.path.insert(0, r"YOUR_PATH\backend\home")
             from call_manager import start_call, call_link, mark_link_sent
             start_call("companion")
             call_link_text = "\n\n" + call_link()
@@ -551,8 +536,6 @@ def api_home_chat(req: CallChatReq, request: Request):
         msg_id = save_message("assistant", reply_full, reasoning_content=reasoning)
     try:
         import sys as _sys
-        if r"YOUR_PATH" not in _sys.path:
-            _sys.path.insert(0, r"YOUR_PATH")
         from wecom.push import push_pair_async
         push_pair_async(req.message, reply_full)
     except Exception as _e:
@@ -564,7 +547,7 @@ def api_home_chat(req: CallChatReq, request: Request):
 def api_home_new_chat(request: Request):
     """一键清空：companion后台记忆全部重置（聊天/亲密/早餐/日记/朋友圈当前/看球残留），
     网页端历史（chat_display_archive + moments_archive）保留，冰箱保留。
-    清空前自动备份到 YOUR_PATH\一键清空_时间戳\。
+    清空前自动备份到 ./backups/一键清空_时间戳/。
     """
     _check_token(request)
     import time as _t
@@ -573,7 +556,7 @@ def api_home_new_chat(request: Request):
     import sqlite3 as _sq
     _now = _t.time()
     _data = r"./data"
-    _bak = r"YOUR_PATH\一键清空_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+    _bak = Path("./backups") / ("一键清空_" + datetime.now().strftime("%Y%m%d_%H%M%S"))
     _os.makedirs(_bak, exist_ok=True)
 
     # 1. 备份（备份完成前不清任何东西）
@@ -660,7 +643,6 @@ def api_home_chat_reasoning(request: Request):
     if not msg_id or not msg_id.isdigit():
         raise HTTPException(status_code=400, detail="bad id")
     import sys as _sys
-    _sys.path.insert(0, r"YOUR_PATH\backend")
     from chat.history import get_reasoning
     r = get_reasoning(int(msg_id))
     return {"reasoning": r}
@@ -865,12 +847,6 @@ def api_plans_review(req: PlanReviewReq, request: Request):
     if req.reason and req.reason.strip():
         try:
             import sys as _sys
-            if r"YOUR_PATH" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH")
-            if r"YOUR_PATH\backend" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend")
-            if r"YOUR_PATH\backend\agent" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\agent")
             from loop import chat as loop_chat, load_config
             from wecom.push import push_reply_to_wecom
             _p = result
@@ -976,8 +952,6 @@ def api_watch_presence(req: WatchFlagReq, request: Request):
 def api_watch_chat(req: WatchChatReq, request: Request):
     _check_token(request)
     import sys as _sys
-    _sys.path.insert(0, r"YOUR_PATH\backend")
-    _sys.path.insert(0, r"YOUR_PATH\backend\agent")
     from watch_manager import get_state, set_typing, append_message
     from loop import watch_chat
     s = get_state()

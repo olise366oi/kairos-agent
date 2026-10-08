@@ -366,8 +366,6 @@ def load_week_context() -> str:
     """companion前后三天的日程概览（city时间）。让他知道前几天/后几天在哪。"""
     try:
         import sys as _sys
-        if r"YOUR_PATH\backend\home" not in _sys.path:
-            _sys.path.insert(0, r"YOUR_PATH\backend\home")
         from status_rule import get_status, _to_home_tz
         from datetime import timedelta
         import status_rule as _sr
@@ -399,8 +397,6 @@ def load_current_status() -> str:
     """companion现在在哪、在干嘛（调 home/status_rule）。失败返回空。"""
     try:
         import sys as _sys
-        if r"YOUR_PATH\backend\home" not in _sys.path:
-            _sys.path.insert(0, r"YOUR_PATH\backend\home")
         from status_rule import get_status_with_location
         r = get_status_with_location()
         loc = r.get("location", "在家")
@@ -439,7 +435,6 @@ def load_recent_diary(limit: int = 7) -> str:
     """读companion最近写的日记。"""
     try:
         import sys
-        sys.path.insert(0, r"YOUR_PATH\backend\home")
         from diary_manager import list_entries
         entries = list_entries()[:limit]
         if not entries:
@@ -456,7 +451,6 @@ def load_recent_moments(limit: int = 10) -> str:
     """读最近的朋友圈动态（companion+user）。"""
     try:
         import sys
-        sys.path.insert(0, r"YOUR_PATH\backend\home")
         from moments_manager import list_posts
         posts = list_posts()[:limit]
         if not posts:
@@ -482,8 +476,6 @@ def load_user_moments() -> str:
     """读 moments.json，返回user最近 5 条朋友圈文本。没有就返回空。"""
     try:
         import sys as _sys
-        if r"YOUR_PATH\backend\home" not in _sys.path:
-            _sys.path.insert(0, r"YOUR_PATH\backend\home")
         from moments_manager import recent_user_posts
         posts = recent_user_posts(5)
         if not posts:
@@ -620,8 +612,6 @@ def _extract_date_plan(user_message: str, reply: str) -> None:
             return
         try:
             import sys as _sys
-            if r"YOUR_PATH\backend\home" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\home")
             from date_plans_manager import add_plan
         except Exception:
             return
@@ -707,8 +697,6 @@ def _detect_call_promise(reply: str) -> None:
         if _target <= _home_tz:
             _target = _target + _td(days=1)  # 已过则明天同一时间
         import sys as _sys
-        if r"YOUR_PATH\backend" not in _sys.path:
-            _sys.path.insert(0, r"YOUR_PATH\backend")
         from call_promise_manager import set_promise
         set_promise(_target.isoformat(), reply)
         print(f"[loop] 记录电话承诺: {_target.isoformat()} <- {reply[:40]}", flush=True)
@@ -1291,7 +1279,10 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
     # 写网络层诊断日志
     try:
         import json as _json
-        with open(r"YOUR_PATH\backend\llm_network_debug.log", "a", encoding="utf-8") as f:
+        from pathlib import Path as _P_log
+        _log_dir = _P_log(__file__).resolve().parent.parent / "logs"
+        _log_dir.mkdir(parents=True, exist_ok=True)
+        with open(_log_dir / "llm_network_debug.log", "a", encoding="utf-8") as f:
             f.write(_json.dumps({
                 "ts": _time.strftime("%Y-%m-%d %H:%M:%S"),
                 "status": _status,
@@ -1321,7 +1312,7 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             "messages_count": len(messages),
             "messages_total_chars": sum(len(str(m.get("content", ""))) for m in messages),
         }
-        with open(r"YOUR_PATH\backend\llm_empty_debug.log", "a", encoding="utf-8") as f:
+        with open(_log_dir / "llm_empty_debug.log", "a", encoding="utf-8") as f:
             f.write(_json.dumps(_diag, ensure_ascii=False) + "\n")
     except Exception as e:
         print(f"[loop] 诊断日志失败: {e}")
@@ -1335,7 +1326,7 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             v = getattr(msg_obj, attr, None)
             if v is not None:
                 fields[attr] = repr(v)[:500]
-        with open(r"YOUR_PATH\backend\llm_full_response.log", "a", encoding="utf-8") as f:
+        with open(_log_dir / "llm_full_response.log", "a", encoding="utf-8") as f:
             f.write(_json2.dumps({
                 "ts": __import__("time").strftime("%Y-%m-%d %H:%M:%S"),
                 "finish_reason": resp.choices[0].finish_reason,
@@ -1355,8 +1346,6 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
         if _r and str(_r).strip():
             _reasoning = str(_r)
             import sys as _sys3
-            if r"YOUR_PATH\wecom" not in _sys3.path:
-                _sys3.path.insert(0, r"YOUR_PATH\wecom")
             from push_thoughts import send_thought_async
             send_thought_async(_reasoning)
     except Exception:

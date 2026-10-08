@@ -388,8 +388,6 @@ async def verify_callback_thoughts(request: Request):
     """思考链 bot（AgentId 1000003）回调验证：用 wecom_config_thoughts.json 验签。"""
     try:
         import sys as _sys2
-        if r"YOUR_PATH\wecom" not in _sys2.path:
-            _sys2.path.insert(0, r"YOUR_PATH\wecom")
         from push_thoughts import load_thoughts_config
         cfg = load_thoughts_config()
     except Exception:

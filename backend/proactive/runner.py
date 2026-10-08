@@ -1,8 +1,7 @@
 import sys
 import time
+from pathlib import Path
 
-sys.path.insert(0, r"YOUR_PATH\backend\proactive")
-sys.path.insert(0, r"YOUR_PATH\backend\companion_awakening")
 
 from companion_awakening import AwakeningService, AwakeningConfig
 from adapter import KairosAdapter, _parse_drivesoid
@@ -30,7 +29,7 @@ def sync_drivesoid_to_engine(engine, alpha=0.4):
 
 service = AwakeningService(
     adapter=KairosAdapter(),
-    state_dir=r"YOUR_PATH\backend\proactive\state",
+    state_dir=str(Path(__file__).resolve().parent / "state"),
     # 想了就全发：发送门槛去掉（speak_threshold=0），生成念头就发；
     # think_threshold 保留（控制思考频率，避免每 60 秒烧一次 token）
     config=AwakeningConfig(enabled=True, think_threshold=0.15, speak_threshold=0.0),
@@ -44,7 +43,6 @@ while True:
         # 看球：companion在家工作（复盘比赛）时发起，每 30 分钟左右判断一次
         try:
             import sys as _sys2
-            _sys2.path.insert(0, r"YOUR_PATH\backend\home")
             from watch_manager import get_state as _ws, start_watch, fetch_recent_finished_fixture, LINK
             from wecom.push import push_reply_to_wecom
             import json as _json, pathlib as _pl
@@ -71,16 +69,12 @@ while True:
             from datetime import datetime
             from zoneinfo import ZoneInfo
             import sys as _sysz
-            _sysz.path.insert(0, r"YOUR_PATH\backend")
             from config import TIMEZONE
             now_p = datetime.now(ZoneInfo(TIMEZONE))
             import sys as _sys
-            _sys.path.insert(0, r"YOUR_PATH\backend\home")
             from diary_manager import has_today, add_entry
             if now_p.hour >= 22 and not has_today():
                 # 调 loop.chat 生成日记（仅保证"每天必须写"）
-                _sys.path.insert(0, r"YOUR_PATH\backend")
-                _sys.path.insert(0, r"YOUR_PATH\backend\agent")
                 from loop import chat as loop_chat, load_config
                 from chat.history import save_thought
                 api_key = load_config().get("api_key", "")
@@ -98,8 +92,6 @@ while True:
         # 再检查一次，定时任务漏了也会补。
         try:
             import sys as _sys3
-            if r"YOUR_PATH\backend\home" not in _sys3.path:
-                _sys3.path.insert(0, r"YOUR_PATH\backend\home")
             from match_news import unnotified_latest, notify_latest
             if unnotified_latest():
                 _nr = notify_latest()

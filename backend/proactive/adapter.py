@@ -1,4 +1,4 @@
-# YOUR_PATH\backend\proactive\adapter.py
+# proactive adapter
 import sys
 import json
 import sqlite3
@@ -7,12 +7,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-sys.path.insert(0, r"YOUR_PATH\backend")
-sys.path.insert(0, r"YOUR_PATH\backend\agent")
-sys.path.insert(0, r"YOUR_PATH\backend\companion_awakening")
 # wecom 路径放最后（append），避免 wecom\config.py 的 `from config` 遮蔽 backend\config
-sys.path.append(r"YOUR_PATH\wecom")
-sys.path.append(r"YOUR_PATH")
 
 DB_PATH = Path("./data/chat_history.db")
 DRY_RUN = False  # 真发模式
@@ -72,8 +67,6 @@ def _read_partner_status():
     # 避免读到 home_state.json 里可能过期的残留值。
     try:
         import sys as _sys
-        if r"YOUR_PATH\backend\home" not in _sys.path:
-            _sys.path.insert(0, r"YOUR_PATH\backend\home")
         from status_rule import get_status
         st = get_status()
         if st:
@@ -122,8 +115,6 @@ class KairosAdapter:
         """读最近朋友圈动态，给 create_thoughts 用。失败返回空串。"""
         try:
             import sys as _sys
-            if r"YOUR_PATH\backend\home" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\home")
             from moments_manager import list_posts
             posts = list_posts()[:limit]
             lines = []
@@ -246,8 +237,6 @@ class KairosAdapter:
         _last_thought_reasoning = getattr(resp.choices[0].message, "reasoning_content", None)
         try:
             import sys as _sys
-            if r"YOUR_PATH\\wecom" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\\wecom")
             from push_thoughts import publish_reasoning
             publish_reasoning(resp, "念头")
         except Exception:
@@ -390,8 +379,6 @@ class KairosAdapter:
         if intent == "moment":
             # companion发朋友圈：回应user（赞/评论）或自己发
             import sys as _sys
-            if r"YOUR_PATH\backend\home" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\home")
             from moments_manager import add_post, like_post, comment_post, list_posts
             if text.startswith("赞") or text.startswith("评论：") or text.startswith("回复评论："):
                 # 回应user最新一条朋友圈
@@ -417,8 +404,6 @@ class KairosAdapter:
         if intent == "both":
             # 发朋友圈 + 顺便写约会邀约（text 第一行朋友圈，第二行邀约）
             import sys as _sys
-            if r"YOUR_PATH\backend\home" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\home")
             from moments_manager import add_post
             lines = text.splitlines()
             moment_text = lines[0].strip() if lines else text
@@ -426,8 +411,6 @@ class KairosAdapter:
             add_post("companion", moment_text)
             if plan_text:
                 try:
-                    if r"YOUR_PATH\backend\agent" not in _sys.path:
-                        _sys.path.insert(0, r"YOUR_PATH\backend\agent")
                     from loop import _extract_date_plan
                     _extract_date_plan("", plan_text)
                 except Exception:
@@ -438,8 +421,6 @@ class KairosAdapter:
             # 提取成功 → 写进 date_plans.json 草稿（user在网页批阅）。静默失败。
             try:
                 import sys as _sys
-                if r"YOUR_PATH\backend\agent" not in _sys.path:
-                    _sys.path.insert(0, r"YOUR_PATH\backend\agent")
                 from loop import _extract_date_plan
                 _extract_date_plan("", text)
             except Exception:
@@ -448,8 +429,6 @@ class KairosAdapter:
         if intent == "diary":
             # companion想记点东西到今天的日记：直接追加，不限制次数（每日必写由 runner 兜底）
             import sys as _sys
-            if r"YOUR_PATH\backend\home" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\home")
             from diary_manager import add_entry
             if text.strip():
                 add_entry(text.strip())
@@ -458,8 +437,6 @@ class KairosAdapter:
         if intent == "call":
             # companion想直接打电话：发起呼叫，把通话链接附在消息后面
             import sys as _sys
-            if r"YOUR_PATH\backend\home" not in _sys.path:
-                _sys.path.insert(0, r"YOUR_PATH\backend\home")
             from call_manager import start_call, mark_link_sent, call_link
             start_call("companion")
             link = call_link()

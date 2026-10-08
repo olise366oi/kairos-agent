@@ -230,8 +230,6 @@ def _gen_commentaries(events):
     if not s.get("active") or s.get("paused") or s.get("typing"):
         return
     try:
-        sys.path.insert(0, r"YOUR_PATH\backend")
-        sys.path.insert(0, r"YOUR_PATH\backend\agent")
         from loop import watch_chat
         for ev in events:
             s = get_state()
