@@ -13,6 +13,9 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import logging
+import os
+import shutil
 import sys
 import threading
 import time
@@ -24,6 +27,14 @@ from pathlib import Path
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import PlainTextResponse
 
+# 调试日志目录（统一放在 ~/.kairos/logs/wecom/ 下）
+_LOG_DIR = Path.home() / ".kairos" / "logs" / "wecom"
+_LOG_DIR.mkdir(parents=True, exist_ok=True)
+_VOICE_DEBUG_LOG = _LOG_DIR / "wecom_voice_debug.log"
+_ENCRYPT_DEBUG_LOG = _LOG_DIR / "voice_debug.log"
+
+logger = logging.getLogger("kairos.wecom")
+
 # 复用重逢后端：agent.loop.chat 与 chat.history
 _BACKEND = Path(__file__).resolve().parent.parent / "backend"
 for _p in (str(_BACKEND), str(_BACKEND / "chat"), str(_BACKEND / "agent"), str(_BACKEND / "persona")):
@@ -33,6 +44,16 @@ for _p in (str(_BACKEND), str(_BACKEND / "chat"), str(_BACKEND / "agent"), str(_
 from wecom.config import load_wecom_config, is_configured  # noqa: E402
 from wecom import crypto  # noqa: E402
 from wecom.push import record_last_user  # noqa: E402
+
+def _safe_record_last_user(user_id: str) -> None:
+    """记录最近发消息的企微用户，失败只打日志不抛异常。
+    失败后果：电脑端主动推送时可能路由不到正确用户，但不影响当前消息处理。
+    """
+    try:
+        record_last_user(user_id)
+    except Exception as e:
+        logger.error("record_last_user 失败: %s: %s", type(e).__name__, e)
+
 from wecom.dedup import is_processed as dedup_is_processed  # noqa: E402
 
 app = FastAPI(title="重逢 · 企业微信接入")
@@ -68,7 +89,7 @@ def _download_media(cfg: dict, media_id: str) -> str:
     """用 media_id 从企业微信下载临时素材，返回 base64 字符串。失败返回空字符串。"""
     try:
         try:
-            with open(r"YOUR_PATH\wecom\wecom_voice_debug.log", "a", encoding="utf-8") as _lf:
+            with open(_VOICE_DEBUG_LOG, "a", encoding="utf-8") as _lf:
                 _lf.write(f"{__import__('time').strftime('%H:%M:%S')} _download_media start, media_id={media_id[:25]}...\n")
         except Exception:
             pass
@@ -86,23 +107,23 @@ def _download_media(cfg: dict, media_id: str) -> str:
             # 出错时企业微信返回 JSON
             try:
                 err = json.loads(body.decode("utf-8"))
-                print(f"[wecom] 下载素材失败: {err}", flush=True)
+                logger.error("下载素材失败: %s", err)
             except Exception:
                 pass
             return ""
         try:
-            with open(r"YOUR_PATH\wecom\wecom_voice_debug.log", "a", encoding="utf-8") as _lf:
+            with open(_VOICE_DEBUG_LOG, "a", encoding="utf-8") as _lf:
                 _lf.write(f"{__import__('time').strftime('%H:%M:%S')} _download_media OK, b64_len={len(base64.b64encode(body))}\n")
         except Exception:
             pass
         return base64.b64encode(body).decode("ascii")
     except Exception as e:
         try:
-            with open(r"YOUR_PATH\wecom\wecom_voice_debug.log", "a", encoding="utf-8") as _lf:
+            with open(_VOICE_DEBUG_LOG, "a", encoding="utf-8") as _lf:
                 _lf.write(f"{__import__('time').strftime('%H:%M:%S')} _download_media ERR: {type(e).__name__} {e}\n")
         except Exception:
             pass
-        print(f"[wecom] 下载素材异常: {type(e).__name__} {e}", flush=True)
+        logger.error("下载素材异常: %s %s", type(e).__name__, e)
         return ""
 
 
@@ -124,11 +145,11 @@ def _analyze_image(image_base64: str, prompt: str = "") -> str:
         with urllib.request.urlopen(req, timeout=60) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         if data.get("error"):
-            print(f"[wecom] VisionBridge 报错: {data.get('error')} {data.get('detail', '')}", flush=True)
+            logger.error("VisionBridge 报错: %s %s", data.get('error'), data.get('detail', ''))
             return ""
         return (data.get("result") or "").strip()
     except Exception as e:
-        print(f"[wecom] 调 VisionBridge 异常: {type(e).__name__} {e}", flush=True)
+        logger.error("调 VisionBridge 异常: %s %s", type(e).__name__, e)
         return ""
 
 
@@ -152,7 +173,7 @@ def _process_image_in_background(cfg: dict, from_user: str, media_id: str, user_
             reply = _handle_message_sync(from_user, combined)
             _send_message(cfg, from_user, reply)
         except Exception as e:
-            print(f"[wecom] 图片处理异常: {type(e).__name__} {e}", flush=True)
+            logger.error("图片处理异常: %s %s", type(e).__name__, e)
 
     threading.Thread(target=worker, daemon=True).start()
 
@@ -163,7 +184,7 @@ def _transcribe_audio(audio_b64: str) -> dict:
         return {}
     try:
         try:
-            with open(r"YOUR_PATH\wecom\wecom_voice_debug.log", "a", encoding="utf-8") as _lf:
+            with open(_VOICE_DEBUG_LOG, "a", encoding="utf-8") as _lf:
                 _lf.write(f"{__import__('time').strftime('%H:%M:%S')} _transcribe_audio start, b64_len={len(audio_b64)}\n")
         except Exception:
             pass
@@ -177,7 +198,7 @@ def _transcribe_audio(audio_b64: str) -> dict:
         with urllib.request.urlopen(req, timeout=90) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         try:
-            with open(r"YOUR_PATH\wecom\wecom_voice_debug.log", "a", encoding="utf-8") as _lf:
+            with open(_VOICE_DEBUG_LOG, "a", encoding="utf-8") as _lf:
                 _lf.write(f"{__import__('time').strftime('%H:%M:%S')} _transcribe_audio OK, text={repr(data.get(chr(116)+chr(101)+chr(120)+chr(116),chr(39)+chr(39))[:80])}, emotions={data.get(chr(101)+chr(109)+chr(111)+chr(116)+chr(105)+chr(111)+chr(110)+chr(115),{})}\n")
         except Exception:
             pass
@@ -187,11 +208,11 @@ def _transcribe_audio(audio_b64: str) -> dict:
         }
     except Exception as e:
         try:
-            with open(r"YOUR_PATH\wecom\wecom_voice_debug.log", "a", encoding="utf-8") as _lf:
+            with open(_VOICE_DEBUG_LOG, "a", encoding="utf-8") as _lf:
                 _lf.write(f"{__import__('time').strftime('%H:%M:%S')} _transcribe_audio ERR: {type(e).__name__} {e}\n")
         except Exception:
             pass
-        print(f"[wecom] VoiceASR 调用异常: {type(e).__name__} {e}", flush=True)
+        logger.error("VoiceASR 调用异常: %s %s", type(e).__name__, e)
         return {}
 
 
@@ -205,7 +226,7 @@ def _process_voice_in_background(cfg: dict, from_user: str, media_id: str) -> No
             else:
                 # wecom 端先转成 16kHz 单声道 16bit wav，再传给 VoiceASR
                 import tempfile, subprocess as _sp
-                FFMPEG = r"YOUR_PATH\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-9.0.1-full_build\bin\ffmpeg.exe"
+                FFMPEG = os.environ.get("KAIROS_FFMPEG") or shutil.which("ffmpeg") or "ffmpeg"
                 try:
                     amr_path = ""
                     wav_path = ""
@@ -218,7 +239,7 @@ def _process_voice_in_background(cfg: dict, from_user: str, media_id: str) -> No
                     with open(wav_path, "rb") as _wf:
                         audio_b64 = base64.b64encode(_wf.read()).decode("ascii")
                 except Exception as _fe:
-                    print(f"[wecom] ffmpeg 转码失败: {_fe}", flush=True)
+                    logger.error("ffmpeg 转码失败: %s", _fe)
                 finally:
                     for _p in (amr_path, wav_path):
                         try:
@@ -231,7 +252,7 @@ def _process_voice_in_background(cfg: dict, from_user: str, media_id: str) -> No
                 emotions = result.get("emotions") or {} if isinstance(result, dict) else {}
 
                 try:
-                    with open(r"YOUR_PATH\wecom\wecom_voice_debug.log", "a", encoding="utf-8") as _lf:
+                    with open(_VOICE_DEBUG_LOG, "a", encoding="utf-8") as _lf:
                         _lf.write(f"{__import__('time').strftime('%H:%M:%S')} worker: text_len={len(text)}, text={repr(text)[:80]}, emotions={emotions}\n")
                 except Exception:
                     pass
@@ -259,7 +280,7 @@ def _process_voice_in_background(cfg: dict, from_user: str, media_id: str) -> No
             reply = _handle_message_sync(from_user, combined)
             _send_message(cfg, from_user, reply)
         except Exception as e:
-            print(f"[wecom] 语音处理异常: {type(e).__name__} {e}", flush=True)
+            logger.error("语音处理异常: %s %s", type(e).__name__, e)
 
     threading.Thread(target=worker, daemon=True).start()
 def _send_message(cfg: dict, user_id: str, content: str) -> None:
@@ -330,7 +351,7 @@ def _process_in_background(cfg: dict, user_id: str, content: str) -> None:
             try:
                 _send_message(cfg, user_id, reply)
             except Exception as e:
-                print(f"[wecom] 回发失败: {e}", flush=True)
+                logger.error("回发失败: %s", e)
 
     threading.Thread(target=run, daemon=True).start()
 
@@ -379,7 +400,8 @@ async def verify_callback(request: Request):
         aes_key = crypto.aes_key_from_encoding_aes_key(cfg["encoding_aes_key"])
         plain = crypto.decrypt(echostr, aes_key, cfg["corp_id"])
     except Exception as e:
-        return PlainTextResponse(f"解密失败: {e}", status_code=403)
+        logger.error("解密失败（GET）: %s: %s", type(e).__name__, e)
+        return PlainTextResponse("解密失败", status_code=403)
     return PlainTextResponse(plain)
 
 
@@ -408,7 +430,8 @@ async def verify_callback_thoughts(request: Request):
         aes_key = crypto.aes_key_from_encoding_aes_key(cfg["encoding_aes_key"])
         plain = crypto.decrypt(echostr, aes_key, cfg["corp_id"])
     except Exception as e:
-        return PlainTextResponse(f"解密失败: {e}", status_code=403)
+        logger.error("解密失败（POST）: %s: %s", type(e).__name__, e)
+        return PlainTextResponse("解密失败", status_code=403)
     return PlainTextResponse(plain)
 
 
@@ -444,7 +467,7 @@ async def receive_callback(request: Request):
         aes_key = crypto.aes_key_from_encoding_aes_key(cfg["encoding_aes_key"])
         plain_xml_text = crypto.decrypt(encrypt, aes_key, cfg["corp_id"])
     except Exception as e:
-        print(f"[wecom] 解密失败: {e}", flush=True)
+        logger.error("解密失败: %s", e)
         return PlainTextResponse("解密失败", status_code=403)
 
     msg = _parse_xml(plain_xml_text.encode("utf-8"))
@@ -455,36 +478,27 @@ async def receive_callback(request: Request):
 
     # MsgId 去重：企业微信可能对同一条消息重复推送，同一条 MsgId 只处理一次
     if msg_id and dedup_is_processed(msg_id):
-        print(f"[wecom] 忽略重复消息 MsgId={msg_id}", flush=True)
+        logger.info("忽略重复消息 MsgId=%s", msg_id)
         return Response(content=b"", status_code=200)
 
     if msg_type == "text" and from_user and content:
         # 记录最近一次从企微发消息的 userid（供电脑端回复精确推送）
-        try:
-            record_last_user(from_user)
-        except Exception:
-            pass
+        _safe_record_last_user(from_user)
         # 立即返回空响应（企业微信 5 秒限制），后台生成回复后主动 send 回发
         _process_in_background(cfg, from_user, content)
     elif msg_type == "image" and from_user:
         # 记录最近一次从企微发消息的 userid
-        try:
-            record_last_user(from_user)
-        except Exception:
-            pass
+        _safe_record_last_user(from_user)
         media_id = msg.get("MediaId", "")
         if media_id:
             _process_image_in_background(cfg, from_user, media_id, user_text="")
         else:
-            print(f"[wecom] 图片消息没有 MediaId，忽略", flush=True)
+            logger.info("图片消息没有 MediaId，忽略")
     elif msg_type == "voice" and from_user:
-        try:
-            record_last_user(from_user)
-        except Exception:
-            pass
+        _safe_record_last_user(from_user)
         # 临时诊断：打印 voice 消息完整内容
         try:
-            with open(r"YOUR_PATH\wecom\voice_debug.log", "a", encoding="utf-8") as f:
+            with open(_ENCRYPT_DEBUG_LOG, "a", encoding="utf-8") as f:
                 f.write(f"=== voice msg at {time.strftime('%Y-%m-%d %H:%M:%S')} ===\n")
                 f.write(f"msg_type={msg_type}\n")
                 f.write(f"msg keys: {list(msg.keys())}\n")
@@ -494,11 +508,11 @@ async def receive_callback(request: Request):
                 f.write(f"Format: {msg.get('Format', '')}\n")
                 f.write("\n")
         except Exception as e:
-            print(f"[wecom] 写诊断日志失败: {e}", flush=True)
+            logger.error("写诊断日志失败: %s", e)
         media_id = msg.get("MediaId", "")
         _process_voice_in_background(cfg, from_user, media_id)
     else:
-        print(f"[wecom] 忽略非文本消息: type={msg_type} from={from_user}", flush=True)
+        logger.info("忽略非文本消息: type=%s from=%s", msg_type, from_user)
 
 # ---------- Apple Watch 健康数据采集（Health Auto Export 推送） ----------
 
@@ -540,7 +554,7 @@ def _ingest_health_in_background(body: dict) -> None:
             }, ensure_ascii=False) + "\n"
             with open(err_log, "a", encoding="utf-8") as f:
                 f.write(line)
-            print(f"[health] 后台写入失败，已记入 {err_log}", flush=True)
+            logger.error("后台写入失败，已记入 %s", err_log)
         except Exception as e2:
             print(f"[health] 后台写入失败，且错误日志也写不进去: {type(e).__name__}: {e}; log_err={e2}", flush=True)
 

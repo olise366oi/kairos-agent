@@ -7,6 +7,9 @@ sentence-transformers==3.3.1
 openai==1.57.2
 pydantic==2.10.4
 
+# wecom 独立服务依赖（企业微信加解密）
+pycryptodome==3.24.0
+
 # 测试依赖（不锁版本，宽松即可；生产依赖保持上方锁定版本）
 pytest
 httpx
