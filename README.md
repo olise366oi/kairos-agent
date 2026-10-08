@@ -1,9 +1,11 @@
 # Kairos — 一个会"决定不说话"的 AI 陪伴 Agent
 
-![Tests](https://github.com/olise366oi/kairos-agent/actions/workflows/test.yml/badge.svg)
+![Tests](https://github.com/olise366oi/kairos-agent/actions/workflows/test.yml/badge.svg) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 心跳循环驱动的主动式对话 + 16 维情感状态引擎 + 双路 API 成本控制。
 12 天独立交付，7,677 行 Python + 2,163 行 JavaScript。
+
+**技术栈**：Python · FastAPI · LangChain · ChromaDB · Node.js (Express 4 + MCP SDK) · 原生 JavaScript · 企业微信 API
 
 > 本项目脱敏自一个真实运行的 AI 伴侣系统：人设、记忆、剧情由使用者自行配置，
 > 代码层不包含任何私人信息。首次启动会引导你填写自己的 persona 与 API Key。
