@@ -19,6 +19,10 @@ AVATAR_PATH = DATA_DIR / "avatar.png"
 # 目标时区（任意 IANA 时区，默认 UTC；状态/日程/天气均按此计算）
 TIMEZONE = os.getenv("APP_TIMEZONE", "UTC")
 
+# 天气感知位置（主基地经纬度，可选；未设置时跳过天气注入）
+HOME_LAT = os.getenv("KAIROS_HOME_LAT", "")
+HOME_LON = os.getenv("KAIROS_HOME_LON", "")
+
 # 线程局部：当前 LLM 调用来源（web / wecom），默认 web
 _SOURCE = threading.local()
 

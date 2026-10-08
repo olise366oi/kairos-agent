@@ -4,7 +4,7 @@ import time
 
 from openai import OpenAI
 
-from config import PERSONA_PATH, load_config, DATA_DIR, llm_model, llm_base_url, llm_api_key, llm_key_id, llm_extra_body, TIMEZONE
+from config import PERSONA_PATH, load_config, DATA_DIR, llm_model, llm_base_url, llm_api_key, llm_key_id, llm_extra_body, TIMEZONE, HOME_LAT, HOME_LON
 from rag.embedder import embed_texts
 from rag.store import query_collection
 from rag.football_kb import search_football
@@ -732,16 +732,6 @@ def _recent_user_streak(limit: int = 10) -> int:
 
 
 # ---------- 天气感知（Open-Meteo，无需 API Key） ----------
-CITY_COORDS = {
-    "city": (48.8566, 2.3522),
-    "曼城": (53.4808, -2.2426),
-    "阿斯顿维拉": (52.4862, -1.8904),
-    "比利亚雷亚尔": (39.9706, -0.0577),
-    "土耳其": (41.0082, 28.9784),
-    "比利时": (50.8503, 4.3517),
-    "意大利": (45.4642, 9.1900),
-}
-
 WEATHER_CODE_TEXT = {
     0: "晴", 1: "基本晴", 2: "多云", 3: "阴",
     45: "雾", 48: "雾凇",
@@ -780,23 +770,18 @@ def _fetch_weather(lat: float, lon: float, tz: str = TIMEZONE) -> str:
 
 
 def get_weather_text() -> str:
-    """city当前天气；随队客场时附客场城市天气。30 分钟缓存，失败返回空串。"""
+    """当前位置天气。30 分钟缓存，未配置坐标或请求失败时返回空串。"""
     if time.time() - _weather_cache["ts"] < 1800 and _weather_cache["text"]:
         return _weather_cache["text"]
+    if not HOME_LAT or not HOME_LON:
+        return ""
     try:
-        now_utc = datetime.now(timezone.utc)
-        home_tz = now_utc.astimezone(timezone(timedelta(hours=_home_tz_utc_offset(now_utc))))
-        travel = get_travel_context(home_tz)
-        cities = [("city", 48.8566, 2.3522)]
-        if travel["city"]:
-            coord = CITY_COORDS.get(travel["city"])
-            if coord:
-                cities.append((travel["city"], coord[0], coord[1]))
-        parts = []
-        for name, lat, lon in cities:
-            tz = TIMEZONE if name == "city" else "auto"
-            parts.append(f"{name}：{_fetch_weather(lat, lon, tz)}")
-        text = "；".join(parts)
+        lat = float(HOME_LAT)
+        lon = float(HOME_LON)
+    except ValueError:
+        return ""
+    try:
+        text = _fetch_weather(lat, lon, TIMEZONE)
         _weather_cache["ts"] = time.time()
         _weather_cache["text"] = text
         return text
@@ -914,7 +899,7 @@ def build_system_prompt(persona: str, memories: list[str], football_text: str = 
         parts.append(f"## 你前后三天的日程（前三天到后七天你在哪、在干嘛，聊到昨天/明天/后天/周末按这个说）\n{_wk}")
     weather_text = get_weather_text()
     if weather_text:
-        parts.append(f"## 天气（city当前天气；客场时含客场城市。聊天中可以自然提及）\n{weather_text}")
+        parts.append(f"## 天气（当前位置实时天气，聊天中可以自然提及）\n{weather_text}")
     if schedule_text:
         parts.append(f"## 赛程信息（主队与国家队的真实赛程与最近战绩，回答赛程/比赛结果问题以此为准）\n{schedule_text}")
     if match_text:

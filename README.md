@@ -187,6 +187,10 @@ cd backend
 pip install -r requirements.txt
 # LLM 三路 API 配置写入 ~/.kairos/config.json（api_key / base_url / model）
 export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
+
+export KAIROS_HOME_LAT=39.9042      # 可选，天气感知纬度（示例为北京）
+export KAIROS_HOME_LON=116.4074     # 可选，天气感知经度；两项都不设则跳过天气注入
+
 # 必须设置 HOME_TOKEN，否则后端启动会直接报错
 # Windows (cmd):        set HOME_TOKEN=<你的随机密钥>
 # Windows (PowerShell): $env:HOME_TOKEN="<你的随机密钥>"
