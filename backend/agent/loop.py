@@ -147,10 +147,6 @@ SCHEDULE_KEYWORDS = frozenset([
     "友谊赛", "开球", "几点踢", "几点开球", "是否出场", "能上场吗",
     "训练基地", "更衣室", "队内", "联赛", "周末比赛",
     "行程", "安排", "日程", "几点", "去哪个城市",
-    "看台", "里昂", "勒芒", "马赛", "斯特拉斯堡",
-    "勒阿弗尔", "特鲁瓦", "尼斯", "洛里昂", "图卢兹", "比利亚雷亚尔",
-    "巴塞罗那", "罗马", "曼城", "土耳其", "比利时", "意大利", "布拉迪斯拉发",
-    "摩纳哥", "布雷斯特", "雷恩", "里尔", "阿森纳", "英格兰", "西班牙",
     "球票", "票留", "开球时间",
 ])
 
@@ -1227,7 +1223,7 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
     # 新对话过滤：只保留"新对话起点"之后的消息（之前的历史不进 LLM 上下文，但网页端仍可见）
     try:
         import os as _os, time as _t
-        _lc_path = r"./data\last_clear.txt"
+        _lc_path = "./data/last_clear.txt"
         if _os.path.exists(_lc_path):
             _lc = float(open(_lc_path).read().strip())
             from datetime import datetime as _dt, timezone as _tz
@@ -1440,7 +1436,7 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             import json as _json3
             import time as _time3
             from pathlib import Path as _Path3
-            _ov_path = _Path3(r"./data\home_status_override.json")
+            _ov_path = _Path3("./data/home_status_override.json")
             _ov_path.write_text(
                 _json3.dumps({"status": "休息", "reason": "companion说回家了", "ts": _time3.time()}, ensure_ascii=False),
                 encoding="utf-8",

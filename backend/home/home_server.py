@@ -394,7 +394,7 @@ def _partner_status() -> str:
     """读 home_state.json 里companion的当前状态。"""
     from pathlib import Path as _P
     import json as _json
-    state_p = _P(r"./data\home_state.json")
+    state_p = _P("./data/home_state.json")
     try:
         with open(state_p, encoding="utf-8") as f:
             st = _json.load(f)
@@ -500,7 +500,7 @@ def api_home_chat_history(request: Request):
     # 网页端显示 = 归档历史（清记忆前导出，后台不再参与记忆） + 当前新对话
     archive = []
     try:
-        with open(r"./data\chat_display_archive.json", encoding="utf-8") as _f:
+        with open("./data/chat_display_archive.json", encoding="utf-8") as _f:
             _data = json.load(_f)
         archive = _data.get("messages", []) if isinstance(_data, dict) else []
     except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
@@ -776,7 +776,7 @@ def api_moments_list(request: Request):
 def api_moments_archive(request: Request):
     _check_token(request)
     try:
-        with open(r"./data\moments_archive.json", encoding="utf-8") as _f:
+        with open("./data/moments_archive.json", encoding="utf-8") as _f:
             _data = json.load(_f)
         return {"posts": _data.get("posts", []) if isinstance(_data, dict) else []}
     except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
