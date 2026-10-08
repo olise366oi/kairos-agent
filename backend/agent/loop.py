@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import logging
 import re
 import time
 
@@ -25,6 +26,8 @@ from agent.arousal import (
     min_duration_text,
     ENTRY_PATTERN,
 )
+
+logger = logging.getLogger("kairos.loop")
 
 GUARDRAIL = """
 ## 重要规则
@@ -309,13 +312,14 @@ def _msg_time_tag(created_at: str) -> str:
 
 def load_schedule() -> str:
     """读取赛程记忆文件（主队 + 国家队），每次回复前实时加载。"""
+    if not SCHEDULE_PATH.exists():
+        return ""
     try:
-        if SCHEDULE_PATH.exists():
-            text = SCHEDULE_PATH.read_text(encoding="utf-8").strip()
-            return text if text else ""
-    except Exception:
-        pass
-    return ""
+        text = SCHEDULE_PATH.read_text(encoding="utf-8").strip()
+        return text if text else ""
+    except Exception as e:
+        logger.error("读取 %s 失败: %s: %s", SCHEDULE_PATH, type(e).__name__, e)
+        return ""
 
 
 def get_next_match_line() -> str:
@@ -353,19 +357,19 @@ def get_next_match_line() -> str:
 
 def load_memory_core() -> str:
     """读取核心记忆文件（重点事件/彼此喜欢/生活细节/未来安排），每次回复前实时加载。"""
+    if not MEMORY_CORE_PATH.exists():
+        return ""
     try:
-        if MEMORY_CORE_PATH.exists():
-            text = MEMORY_CORE_PATH.read_text(encoding="utf-8").strip()
-            return text if text else ""
-    except Exception:
-        pass
-    return ""
+        text = MEMORY_CORE_PATH.read_text(encoding="utf-8").strip()
+        return text if text else ""
+    except Exception as e:
+        logger.error("读取 %s 失败: %s: %s", MEMORY_CORE_PATH, type(e).__name__, e)
+        return ""
 
 
 def load_week_context() -> str:
     """companion前后三天的日程概览（city时间）。让他知道前几天/后几天在哪。"""
     try:
-        import sys as _sys
         from status_rule import get_status, _to_home_tz
         from datetime import timedelta
         import status_rule as _sr
@@ -389,14 +393,14 @@ def load_week_context() -> str:
             tag = "（今天）" if d == 0 else ""
             lines.append(f"- {day.month}/{day.day} {wd[day.weekday()]}{tag}：{st}。{reason}")
         return "你的近期日程（city时间，聊天提到前几天/后几天/明天/昨天时按这个说）：\n" + "\n".join(lines)
-    except Exception:
+    except Exception as e:
+        logger.error("加载周日程失败: %s: %s", type(e).__name__, e)
         return ""
 
 
 def load_current_status() -> str:
     """companion现在在哪、在干嘛（调 home/status_rule）。失败返回空。"""
     try:
-        import sys as _sys
         from status_rule import get_status_with_location
         r = get_status_with_location()
         loc = r.get("location", "在家")
@@ -406,7 +410,8 @@ def load_current_status() -> str:
         if loc == "外出":
             extra = "你现在不在家。绝对不要说你今早做了早餐/在家做饭/在家打扫/在家陪她，这些事你做不了。提到吃饭/早餐就说是在基地/外面吃的。"
         return f"你现在{loc}，正在{st}。{reason}。聊天时你的位置/动作/状态要和这个一致，不要说你在别的地方做别的事。{extra}"
-    except Exception:
+    except Exception as e:
+        logger.error("加载当前状态失败: %s: %s", type(e).__name__, e)
         return ""
 
 def load_home_eaten() -> str:
@@ -427,14 +432,14 @@ def load_home_eaten() -> str:
             if text:
                 lines.append(f"- {t} {text}" if t else f"- {text}")
         return "\n".join(lines)
-    except Exception:
+    except Exception as e:
+        logger.error("读取今日饮食记录失败: %s: %s", type(e).__name__, e)
         return ""
 
 
 def load_recent_diary(limit: int = 7) -> str:
     """读companion最近写的日记。"""
     try:
-        import sys
         from diary_manager import list_entries
         entries = list_entries()[:limit]
         if not entries:
@@ -443,14 +448,14 @@ def load_recent_diary(limit: int = 7) -> str:
         for e in entries:
             lines.append(f"[{e['date']}]\n{e['content']}")
         return "\n\n".join(lines)
-    except Exception:
+    except Exception as e:
+        logger.error("读取最近日记失败: %s: %s", type(e).__name__, e)
         return ""
 
 
 def load_recent_moments(limit: int = 10) -> str:
     """读最近的朋友圈动态（companion+user）。"""
     try:
-        import sys
         from moments_manager import list_posts
         posts = list_posts()[:limit]
         if not posts:
@@ -468,20 +473,21 @@ def load_recent_moments(limit: int = 10) -> str:
                 extra += f" [评论:{cmts}]"
             lines.append(f"[{author}] {p['content']}{extra}")
         return "\n".join(lines)
-    except Exception:
+    except Exception as e:
+        logger.error("读取最近朋友圈动态失败: %s: %s", type(e).__name__, e)
         return ""
 
 
 def load_user_moments() -> str:
     """读 moments.json，返回user最近 5 条朋友圈文本。没有就返回空。"""
     try:
-        import sys as _sys
         from moments_manager import recent_user_posts
         posts = recent_user_posts(5)
         if not posts:
             return ""
         return "\n".join(f"- {p['content']}" for p in posts)
-    except Exception:
+    except Exception as e:
+        logger.error("读取用户朋友圈失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -520,7 +526,8 @@ def load_home_breakfast() -> str:
         if bf.get("drink"):
             parts.append(f"饮品：{bf['drink']}")
         return "\n".join(parts)
-    except Exception:
+    except Exception as e:
+        logger.error("读取今日早餐失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -543,7 +550,8 @@ def load_home_fridge() -> str:
             if name:
                 lines.append(f"- {name}" + (f"（{qty} {unit}）" if qty else ""))
         return "\n".join(lines)
-    except Exception:
+    except Exception as e:
+        logger.error("读取冰箱食材失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -706,13 +714,14 @@ def _detect_call_promise(reply: str) -> None:
 
 def load_profile() -> str:
     """读取companion详细资料档案（profile.txt），每次回复前实时加载。"""
+    if not PROFILE_PATH.exists():
+        return ""
     try:
-        if PROFILE_PATH.exists():
-            text = PROFILE_PATH.read_text(encoding="utf-8").strip()
-            return text if text else ""
-    except Exception:
-        pass
-    return ""
+        text = PROFILE_PATH.read_text(encoding="utf-8").strip()
+        return text if text else ""
+    except Exception as e:
+        logger.error("读取 %s 失败: %s: %s", PROFILE_PATH, type(e).__name__, e)
+        return ""
 
 
 def _recent_user_streak(limit: int = 10) -> int:
