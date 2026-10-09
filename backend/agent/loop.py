@@ -278,7 +278,8 @@ def get_last_user_msg_time_text() -> str:
         else:
             _rel = f"{_msg_local.month}月{_msg_local.day}日 {_msg_local.strftime('%H:%M')}"
         return f"user上一条消息的时间：{_rel}（{_loc}时间）"
-    except Exception:
+    except Exception as e:
+        logger.warning("获取用户最后消息时间失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -306,7 +307,8 @@ def _msg_time_tag(created_at: str) -> str:
         if _days == 2:
             return f"前天{_hm}"
         return f"{_msg_loc.month}月{_msg_loc.day}日 {_hm}"
-    except Exception:
+    except Exception as e:
+        logger.warning("生成消息时间标签失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -351,7 +353,8 @@ def get_next_match_line() -> str:
                 best = dt
                 best_line = line.strip()
         return best_line
-    except Exception:
+    except Exception as e:
+        logger.warning("加载下一场比赛失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -592,8 +595,8 @@ def _sync_talked_breakfast(user_message: str, reply: str) -> None:
             "fridge_updated": True,
         }
         HOME_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("同步早餐状态失败: %s: %s", type(e).__name__, e)
 
 
 _PLAN_DATE_RE = re.compile(r"\d{1,2}月\d{1,2}日|周[日一二三四五六天]|明天|明晚|明早|今晚|明天晚上|后天|后天晚上|下[周星][日一二三四五六天]|这[周星][日一二三四五六天]|下周末|周末|周六|周日")
@@ -621,7 +624,8 @@ def _extract_date_plan(user_message: str, reply: str) -> None:
         try:
             import sys as _sys
             from date_plans_manager import add_plan
-        except Exception:
+        except Exception as e:
+            logger.debug("date_plans_manager 不可用，跳过计划提取: %s: %s", type(e).__name__, e)
             return
         now_p = datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=_home_tz_utc_offset(datetime.now(timezone.utc)))))
         _week_cn = ("周一", "周二", "周三", "周四", "周五", "周六", "周日")[now_p.weekday()]
@@ -647,8 +651,8 @@ def _extract_date_plan(user_message: str, reply: str) -> None:
         try:
             from push_thoughts import publish_reasoning
             publish_reasoning(resp, "意图")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("意图思考链推送失败: %s: %s", type(e).__name__, e)
         text = (resp.choices[0].message.content or "").strip()
         m = _re.search(r"\{.*\}", text, _re.S)
         if not m:
@@ -663,8 +667,8 @@ def _extract_date_plan(user_message: str, reply: str) -> None:
             location=data.get("location") or "",
             event=data.get("event") or "约会",
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("提取约会计划失败: %s: %s", type(e).__name__, e)
 
 
 def _detect_call_promise(reply: str) -> None:
@@ -707,9 +711,9 @@ def _detect_call_promise(reply: str) -> None:
         import sys as _sys
         from call_promise_manager import set_promise
         set_promise(_target.isoformat(), reply)
-        print(f"[loop] 记录电话承诺: {_target.isoformat()} <- {reply[:40]}", flush=True)
-    except Exception:
-        pass
+        logger.info("记录电话承诺: %s <- %s", _target.isoformat(), reply[:40])
+    except Exception as e:
+        logger.warning("记录电话承诺失败: %s: %s", type(e).__name__, e)
 
 
 def load_profile() -> str:
@@ -729,7 +733,8 @@ def _recent_user_streak(limit: int = 10) -> int:
     try:
         from chat.history import get_history
         hist = get_history(limit=limit)
-    except Exception:
+    except Exception as e:
+        logger.warning("统计用户连续发言失败: %s: %s", type(e).__name__, e)
         return 0
     n = 0
     for h in reversed(hist):
@@ -794,7 +799,8 @@ def get_weather_text() -> str:
         _weather_cache["ts"] = time.time()
         _weather_cache["text"] = text
         return text
-    except Exception:
+    except Exception as e:
+        logger.warning("天气请求失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -811,7 +817,8 @@ def get_drives_context(timeout: float = 1.5) -> str:
             if text.startswith("[drives]"):
                 return text
             return ""
-    except Exception:
+    except Exception as e:
+        logger.debug("Drivesoid 情感状态读取失败: %s: %s", type(e).__name__, e)
         return ""
 
 
@@ -849,7 +856,8 @@ def get_today_match(now=None) -> dict | None:
                 "line": line.strip(),
             }
         return None
-    except Exception:
+    except Exception as e:
+        logger.warning("加载今日比赛失败: %s: %s", type(e).__name__, e)
         return None
 
 
@@ -876,8 +884,8 @@ def _auto_set_match_status(match_info: dict) -> None:
         }
         state["today"] = today
         HOME_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("自动设置比赛状态失败: %s: %s", type(e).__name__, e)
 
 
 def build_system_prompt(persona: str, memories: list[str], football_text: str = "", intimacy_text: str = "", intimacy_engine_text: str = "", geography_text: str = "", nutrition_text: str = "", hobbies_text: str = "", trivia_text: str = "", psych_text: str = "", availability_note: str = "", arousal_text: str = "", schedule_text: str = "", diary_text: str = "", moments_text: str = "", match_text: str = "") -> str:
@@ -1015,8 +1023,8 @@ def _log_usage(usage) -> None:
         }
         with open(log_dir / "usage.log", "a", encoding="utf-8") as f:
             f.write(_json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("写入用量日志失败: %s: %s", type(e).__name__, e)
 
 
 def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str | tuple[str, str | None]:
@@ -1075,7 +1083,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_football(user_message, n_results=3)
             if hits:
                 football_text = "\n\n".join(hits)
-        except Exception:
+        except Exception as e:
+            logger.warning("football RAG 检索失败: %s: %s", type(e).__name__, e)
             football_text = ""
 
     # Intimacy KB: 按需检索（只有命中亲密关键词才检索，日常聊天不注入）
@@ -1085,7 +1094,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_intimacy(user_message, n_results=3)
             if hits:
                 intimacy_text = "\n\n".join(hits)
-        except Exception:
+        except Exception as e:
+            logger.warning("intimacy RAG 检索失败: %s: %s", type(e).__name__, e)
             intimacy_text = ""
 
     # Intimacy Engine KB: 只在亲密场景"明确发生"时注入（比上面更严格）
@@ -1105,7 +1115,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_intimacy_engine(user_message, n_results=3)
             if hits:
                 intimacy_engine_text = "\n\n".join(hits)
-    except Exception:
+    except Exception as e:
+        logger.warning("intimacy engine 场景激活失败: %s: %s", type(e).__name__, e)
         intimacy_engine_text = ""
 
     # 亲密场景触发时注入当前兴奋度
@@ -1120,7 +1131,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_geography(user_message, n_results=3)
             if hits:
                 geography_text = "\n\n".join(hits)
-        except Exception:
+        except Exception as e:
+            logger.warning("geography RAG 检索失败: %s: %s", type(e).__name__, e)
             geography_text = ""
 
     # Nutrition KB: 按需检索（只有命中饮食/做饭关键词才检索，日常聊天不注入）
@@ -1130,7 +1142,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_nutrition(user_message, n_results=3)
             if hits:
                 nutrition_text = "\n\n".join(hits)
-        except Exception:
+        except Exception as e:
+            logger.warning("nutrition RAG 检索失败: %s: %s", type(e).__name__, e)
             nutrition_text = ""
 
     # Hobbies KB: 按需检索（只有命中钢琴/画画/围棋关键词才检索，日常聊天不注入）
@@ -1140,7 +1153,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_hobbies(user_message, n_results=3)
             if hits:
                 hobbies_text = "\n\n".join(hits)
-        except Exception:
+        except Exception as e:
+            logger.warning("hobbies RAG 检索失败: %s: %s", type(e).__name__, e)
             hobbies_text = ""
 
     # Trivia KB: 按需检索（只有命中琐事记忆关键词才检索，日常聊天不注入）
@@ -1150,7 +1164,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_trivia(user_message, n_results=5)
             if hits:
                 trivia_text = "\n\n".join(hits)
-        except Exception:
+        except Exception as e:
+            logger.warning("trivia RAG 检索失败: %s: %s", type(e).__name__, e)
             trivia_text = ""
 
     # Psych KB: 按需检索（只有命中心理健康关键词才检索，日常聊天不注入）
@@ -1160,7 +1175,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             hits = search_psych_kb(user_message, n_results=3)
             if hits:
                 psych_text = "\n\n".join(hits)
-        except Exception:
+        except Exception as e:
+            logger.warning("psych RAG 检索失败: %s: %s", type(e).__name__, e)
             psych_text = ""
 
     # Diary: 按需注入（只有命中日记话题关键词才读取最近日记，日常聊天不注入）
@@ -1181,7 +1197,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             _nxt = get_next_match_line()
             if _nxt:
                 schedule_text = f"（硬规则：赛程只信本条，逐行读，别凭记忆。本条没有的日期、对手、场地、主客场都不存在，禁止使用本条之外的现实赛程、旧记忆或自己的知识作答。若user转述的日期/对手/场地与本条不符，或你之前说错过，一律以本条为准，坦率纠正她「记岔了/我说错了」，绝不顺着她的话或圆场。问\"下一场/什么时候踢/对阵谁/几点踢\"时，把下面【下一场】那一行逐字照抄进回复——日期、对手、主场客场一字不许改。）\n【下一场】{_nxt}（最近一场比赛，国际比赛日他随国家队）\n\n" + schedule_text
-        except Exception:
+        except Exception as e:
+            logger.warning("聊天内联加载日程失败: %s: %s", type(e).__name__, e)
             schedule_text = ""
 
     # 比赛日自动状态 + 注入：按 schedule.txt 判断今天有没有比赛（有则自动设 status=比赛 + 注入对手/时间）
@@ -1191,7 +1208,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
         if _match_info:
             _auto_set_match_status(_match_info)
             match_text = _match_info["line"]
-    except Exception:
+    except Exception as e:
+        logger.warning("加载今日比赛失败: %s: %s", type(e).__name__, e)
         match_text = ""
 
     # Build prompt and call LLM
@@ -1213,8 +1231,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
                 h for h in recent_history
                 if _dt.fromisoformat(h.get("created_at","")).replace(tzinfo=_tz.utc).timestamp() >= _lc
             ]
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("过滤新对话历史失败: %s: %s", type(e).__name__, e)
     if recent_history and recent_history[-1].get("role") == "user" and recent_history[-1].get("content") == user_message:
         recent_history = recent_history[:-1]
     messages = [{"role": "system", "content": system_prompt}]
@@ -1262,8 +1280,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
         try:
             from api_usage import record_usage
             record_usage(_key_id, resp.usage.total_tokens if resp.usage else 0)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("记录 API 用量失败: %s: %s", type(e).__name__, e)
     except Exception as _e:
         _elapsed = _time.time() - _call_start
         _status = "EXCEPTION"
@@ -1286,8 +1304,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
                 "model": _api_model,
                 "user_msg_len": len(user_message or ""),
             }, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("写入网络诊断日志失败: %s: %s", type(e).__name__, e)
 
     # 临时诊断：记录 LLM 完整响应
     try:
@@ -1309,7 +1327,7 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
         with open(_log_dir / "llm_empty_debug.log", "a", encoding="utf-8") as f:
             f.write(_json.dumps(_diag, ensure_ascii=False) + "\n")
     except Exception as e:
-        print(f"[loop] 诊断日志失败: {e}")
+        logger.warning("诊断日志写入失败: %s: %s", type(e).__name__, e)
 
     # 临时诊断：记录 LLM 完整响应字段（查 393 token 去哪了）
     try:
@@ -1330,8 +1348,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
                     "completion_tokens": getattr(resp.usage, "completion_tokens", None),
                 } if getattr(resp, "usage", None) else None,
             }, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("写入完整响应诊断日志失败: %s: %s", type(e).__name__, e)
 
     # 思考链同步到独立企微 bot（失败静默，不阻塞主回复）
     _reasoning: str | None = None
@@ -1342,8 +1360,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             import sys as _sys3
             from push_thoughts import send_thought_async
             send_thought_async(_reasoning)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("思考链推送失败: %s: %s", type(e).__name__, e)
 
     reply = resp.choices[0].message.content
 
@@ -1391,14 +1409,15 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
             try:
                 from push_thoughts import publish_reasoning
                 publish_reasoning(resp2, "重试")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("重试轮思考链推送失败: %s: %s", type(e).__name__, e)
             reply2 = (resp2.choices[0].message.content or "").strip()
             if reply2 and not any(p in reply2 for p in template_patterns):
                 reply = reply2
             else:
                 reply = ""
-        except Exception:
+        except Exception as e:
+            logger.error("第二轮 LLM 重试失败: %s: %s", type(e).__name__, e)
             reply = ""
 
     # 空回复兜底：不重试（省 token）
@@ -1424,8 +1443,8 @@ def chat(user_message: str, api_key: str, return_reasoning: bool = False) -> str
                 _json3.dumps({"status": "休息", "reason": "companion说回家了", "ts": _time3.time()}, ensure_ascii=False),
                 encoding="utf-8",
             )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("回家状态写入失败: %s: %s", type(e).__name__, e)
 
     # companion若在聊天里描述了今早做了什么早餐，写回网页（网页显示companion说的，不再自动抽）
     _sync_talked_breakfast(user_message, reply)
@@ -1462,7 +1481,8 @@ def watch_chat(user_message: str, context: str = "", return_reasoning: bool = Fa
             extra_body=llm_extra_body(),
         )
         reply = (resp.choices[0].message.content or "").strip()
-    except Exception:
+    except Exception as e:
+        logger.error("watch_chat LLM 调用失败: %s: %s", type(e).__name__, e)
         reply = ""
     if not reply:
         reply = "（看球时走神了一下，你再说一遍？）"
