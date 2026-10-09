@@ -174,6 +174,7 @@ flowchart TD
 - **角色状态的具体规则由使用者自行定义**。`home_state.json` 的结构和状态读取逻辑在公开版保留，但原项目中「根据日程 / 时间自动切换状态」的规则模块（`status_rule.py`）已随脱敏移除。使用者需自行维护状态文本——直接编辑 `home_state.json`，或实现自己的状态规则模块。
 - **两套用量记录机制并存**。`api_usage.record_usage`（写 `~/.kairos/api_usage.json`，服务成本控制判断）与 `loop._log_usage`（写 `backend/logs/usage.log`，用于事后分析）功能部分重叠，是历史迭代遗留。合并前需确认两套数据各自的消费方。
 - **Windows 启动脚本硬编码 Python 3.11 路径**。三个 `.bat` 使用 `%LOCALAPPDATA%\Programs\Python\Python311\python.exe`，用户装 3.12 或用非默认安装位置时会失败。改用 `py -3` launcher 是更通用的方案，但需在无 Windows CI 的环境下谨慎验证。
+- **知识域关键词是为原角色定制的示例，非通用词表**。`loop.py` 里的 `FOOTBALL_KEYWORDS` / `NUTRITION_KEYWORDS` / `HOBBIES_KEYWORDS` 等常量反映了原项目伴侣的人设（职业球员、具体兴趣爱好），粒度较细。它们的作用是「用户提到什么话题时触发对应 RAG 知识库检索」——使用者应基于自己的角色重新定义这些词表。各知识域的 txt 内容同样需自行提供（见「记忆机制」节）。
 
 ---
 

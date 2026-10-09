@@ -83,7 +83,7 @@ def search_intimacy_engine(query: str, n_results: int = 3) -> list[str]:
         return []
     res = col.query(query_embeddings=[qemb], n_results=n_results)
     docs = res["documents"][0] if res["documents"] else []
-    # 强制注入「细节质感」段（7月后期腔调，必须）：不依赖检索命中，亲密场景必带
+    # 强制注入「细节质感」段：不依赖检索命中，亲密场景必带
     for c in _cache.get("chunks", []):
         if c.startswith("=== 细节质感"):
             if not any("细节质感" in d for d in docs):

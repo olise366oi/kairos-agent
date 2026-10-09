@@ -69,7 +69,7 @@ def _ensure_index() -> bool:
 
 
 def search_hobbies(query: str, n_results: int = 3) -> list[str]:
-    """检索与钢琴/画笔/颜料/围棋/爱好最相关的片段（按需调用，仅在命中关键词时使用）。"""
+    """检索与爱好/兴趣最相关的片段（按需调用，仅在命中关键词时使用）。"""
     if not _ensure_index():
         return []
     from rag.embedder import embed_texts
