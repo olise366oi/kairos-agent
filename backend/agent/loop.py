@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 import logging
 import re
@@ -370,12 +371,31 @@ def load_memory_core() -> str:
         return ""
 
 
+@contextmanager
+def _suppress_intimate_state():
+    """临时抑制 status_rule 的亲密/晚安状态读取。
+
+    用于 load_week_context 遍历历史/未来日期时，
+    避免当前亲密模式污染历史天的状态判断。
+    使用 try/finally 确保异常时也恢复，防止模块状态被永久篡改。
+    """
+    import status_rule as _sr
+    _orig_intimate = _sr._intimate_now
+    _orig_goodnight = _sr._said_goodnight
+    _sr._intimate_now = lambda: False
+    _sr._said_goodnight = lambda x: False
+    try:
+        yield
+    finally:
+        _sr._intimate_now = _orig_intimate
+        _sr._said_goodnight = _orig_goodnight
+
+
 def load_week_context() -> str:
     """companion前后三天的日程概览（city时间）。让他知道前几天/后几天在哪。"""
     try:
         from status_rule import get_status, _to_home_tz
         from datetime import timedelta
-        import status_rule as _sr
         now_p = _to_home_tz(None)
         lines = []
         wd = ["周一","周二","周三","周四","周五","周六","周日"]
@@ -383,14 +403,10 @@ def load_week_context() -> str:
             day = now_p + timedelta(days=d)
             if d != 0:
                 # 历史/未来天：不把"当前亲密/晚安"算进去
-                _orig = _sr._intimate_now
-                _orig_goodnight = _sr._said_goodnight
-                _sr._intimate_now = lambda: False
-                _sr._said_goodnight = lambda x: False
-            r = get_status(day)
-            if d != 0:
-                _sr._intimate_now = _orig
-                _sr._said_goodnight = _orig_goodnight
+                with _suppress_intimate_state():
+                    r = get_status(day)
+            else:
+                r = get_status(day)
             st = r.get("status","")
             reason = r.get("reason","")
             tag = "（今天）" if d == 0 else ""
