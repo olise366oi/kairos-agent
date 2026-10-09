@@ -217,10 +217,11 @@ pip install pytest httpx
 python -m pytest tests/ -v
 ```
 
-58 个测试（CI 使用 Python 3.11），覆盖：
+69 个测试（CI 使用 Python 3.11），覆盖：
 - `wecom/crypto.py`：AES-256-CBC round-trip（中文/长消息）、签名排序、篡改检测
 - `agent/loop.py`：DST 冬夏令时边界、赛程解析、约会意图识别（4 个纯函数）
 - `config.py`：峰谷定价时区转换 + 半开区间、配置读写 round-trip、损坏 JSON 行为
+- `config.py` 的 `effective_config`：三路 API 路由（峰谷 / web-api2 / 超额回退 / 兜底），11 个分支边界
 - `_suppress_intimate_state`：状态隔离 context manager（含异常路径防回归）
 - `home_server`：认证 + 首次配置流程
 
