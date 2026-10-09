@@ -5,12 +5,12 @@
 心跳循环驱动的主动式对话 + 16 维情感状态引擎 + 双路 API 成本控制（DeepSeek 官方 + 火山方舟双账号）。
 12 天独立交付，7,283 行 Python + 2,163 行 JavaScript。开源整理（脱敏 + 测试补齐 + 工程加固）另耗 3 天。
 
+**Kairos** is an AI companion agent that runs on a heartbeat loop — instead of replying to every prompt, it periodically decides whether to speak, write a diary entry, or stay silent. The system pairs a 16-dimension continuous emotion engine (independent Node.js process) with a multi-source API pool that routes each request based on peak/off-peak pricing and remaining quota. Built solo in 12 days: 7,283 lines of Python + 2,163 lines of JavaScript, delivered across web / WeChat Work / desktop with shared state.
+
 **技术栈**：Python · FastAPI · LangChain · ChromaDB · Node.js (Express 4 + MCP SDK) · 原生 JavaScript · 企业微信 API
 
 > 本项目脱敏自一个真实运行的 AI 伴侣系统：人设、记忆、剧情由使用者自行配置，
 > 代码层不包含任何私人信息。首次启动会引导你填写自己的 persona 与 API Key。
-
-![界面预览](backend/docs/screenshot-chat.png)
 
 ---
 
