@@ -202,6 +202,11 @@ export APP_TIMEZONE=Asia/Shanghai   # 可选，默认 UTC
 export KAIROS_HOME_LAT=39.9042      # 可选，天气感知纬度（示例为北京）
 export KAIROS_HOME_LON=116.4074     # 可选，天气感知经度；两项都不设则跳过天气注入
 
+# 可选：看球复盘功能（三项都不设则静默跳过；也可写入 backend/home/.env）
+export FIVEDOLLARFOOTBALL_API_KEY=<your-key>       # 5DollarFootballAPI 密钥
+export FIVEDOLLAR_LEAGUE_ID=<your-league-id>       # 关注的联赛 ID（如 Ligue 1）
+export FIVEDOLLAR_HOME_TEAM_ID=<your-team-id>      # 主队 ID
+
 # 必须设置 HOME_TOKEN，否则后端启动会直接报错
 # Windows (cmd):        set HOME_TOKEN=<你的随机密钥>
 # Windows (PowerShell): $env:HOME_TOKEN="<你的随机密钥>"
