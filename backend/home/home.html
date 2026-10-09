@@ -557,10 +557,6 @@ footer > div:first-child{font-family:"Playfair Display",serif;font-size:18px;let
   <div class="card"><h2><span class="icon">🛍️</span>今天回来给伴侣带了</h2>
     <div id="brought-box"><div class="empty">加载中…</div></div>
   </div>
-
-  <div class="card"><h2><span class="icon">🎫</span>已经帮伴侣买好票了~</h2>
-    <div id="date-box"><div class="empty">加载中…</div></div>
-  </div>
 </div>
 
 <div id="loading">正在加载…</div>
@@ -1056,14 +1052,6 @@ function render(state){
     brBox.innerHTML=brought.map(function(it){
       return '<div class="row"><span><span class="item-name">'+esc(it.name)+'</span><span class="item-qty">'+esc(qtyText(it))+'</span></span></div>';
     }).join('');
-  }
-
-  const nd=today.next_date||{};
-  const dateBox=document.getElementById('date-box');
-  if(nd.date||nd.text){
-    dateBox.innerHTML='<div class="row"><span class="item-name">'+esc(fmtDate(nd.date))+(nd.date&&nd.text?' · ':'')+esc(nd.text||'')+'</span></div>';
-  }else{
-    dateBox.innerHTML='<div class="empty">还没有安排</div>';
   }
 }
 
