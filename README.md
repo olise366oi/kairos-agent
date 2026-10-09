@@ -217,8 +217,16 @@ pip install pytest httpx
 python -m pytest tests/ -v
 ```
 
+58 个测试（CI 使用 Python 3.11），覆盖：
+- `wecom/crypto.py`：AES-256-CBC round-trip（中文/长消息）、签名排序、篡改检测
+- `agent/loop.py`：DST 冬夏令时边界、赛程解析、约会意图识别（4 个纯函数）
+- `config.py`：峰谷定价时区转换 + 半开区间、配置读写 round-trip、损坏 JSON 行为
+- `_suppress_intimate_state`：状态隔离 context manager（含异常路径防回归）
+- `home_server`：认证 + 首次配置流程
+
+测试通过 `conftest.py` 注入 stub（openai / rag.* / 私有模块），
+使公开仓库在不安装 chromadb/sentence-transformers 的环境下也能运行全部测试。
 测试使用临时 HOME 目录隔离，不会污染你的 `~/.kairos/` 配置。
-测试在 Python 3.14.7 + pytest 9.1.1 下验证通过（6 passed）。生产依赖锁版本见 requirements.txt，如遇版本兼容问题请以锁版为准。
 
 ---
 
