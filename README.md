@@ -3,7 +3,7 @@
 ![Tests](https://github.com/olise366oi/kairos-agent/actions/workflows/test.yml/badge.svg) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 心跳循环驱动的主动式对话 + 16 维情感状态引擎 + 双路 API 成本控制（DeepSeek 官方 + 火山方舟双账号）。
-12 天独立交付，7,283 行 Python + 2,163 行 JavaScript。
+12 天独立交付，7,283 行 Python + 2,163 行 JavaScript。开源整理（脱敏 + 测试补齐 + 工程加固）另耗 3 天。
 
 **技术栈**：Python · FastAPI · LangChain · ChromaDB · Node.js (Express 4 + MCP SDK) · 原生 JavaScript · 企业微信 API
 
@@ -20,7 +20,7 @@
 - 核心后端模块 **40 个**（backend 32 + wecom 8），FastAPI 路由 **43 条**（home_server.py 单文件口径；含 wecom 回调服务则为 49 条）
 - RAG 知识库 **7 类**，MCP 工具 **3 个**（情感引擎服务端）
 - 三端入口（移动 Web / 企微 / 桌面），情感引擎独立进程（REST + MCP 双协议）
-- 开发周期：2026年9月13日 – 9月24日，独立开发。
+- 开发周期：原项目 2026年9月13日 – 9月24日独立开发；开源整理（脱敏 / 测试 / 工程加固）另耗 3 天。
 
 ---
 
@@ -70,6 +70,12 @@
 - `-webkit-overflow-scrolling:touch` + `overscroll-behavior:contain` 防滚动穿透
 - `Intl.DateTimeFormat` 绕过 Safari 对 `toLocaleString` 的兼容差异
 - 前后端共用 `APP_TIMEZONE`，支持任意 IANA 时区，默认 UTC
+
+交互层提供三个前端能力：
+
+- **深度思考模式一键开关**：用户控制是否启用 DeepSeek 的 reasoning_content 输出
+- **思考链查看**：点击聊天气泡展开 reasoning_content，保留模型的推理过程
+- **一键清空聊天数据**：聊天窗口右上角按钮，清空后端 `chat_history.db`，前端展示保留至刷新
 
 三端共用同一 SQLite 聊天历史与状态文件，回复与状态实时一致。
 
@@ -137,6 +143,7 @@ flowchart TD
 | 🔀 多渠道成本控制 | 双路 API 池（DeepSeek 官方 + 火山方舟，同一模型），配额耗尽自动回退 |
 | 📱 三端一致 | 移动端 Web / 企业微信 / 桌面悬浮球共用同一状态层 |
 | 🔌 外部集成 | MCP 协议接入赛事数据，Open-Meteo 天气，企业微信推送 |
+| 🎛️ 交互控制 | 深度思考模式一键开关；点击聊天气泡查看思考链；聊天窗口一键清空后台聊天数据（前端展示保留） |
 
 ---
 
@@ -153,6 +160,7 @@ flowchart TD
 - **API Key 明文存储**：当前配置（`~/.kairos/config.json`）为简化实现，生产环境请改用环境变量或密钥管理服务。
 - **脱敏是迭代收敛的过程**。本项目脱敏自一个真实运行的 AI 伴侣系统。首轮脱敏移除主要个人信息后，后续全仓审查又陆续发现并修复了多处漏网：拼音变量名（`ringing_from_rin`）、真名残留（朋友圈显示名、球员映射表）、脱敏占位死路径（`YOUR_PATH`）、跨平台反斜杠路径、硬编码 token 等。这说明脱敏不是一次性操作，而是需要多轮扫描 + 回归验证的迭代过程。所有已知漏网项均已记录在 `SECURITY_REDACTION_REPORT.md` 的「迭代脱敏记录」一节中，`grep` 确认 0 残留。
 - **天气感知的位置来源是手动配置，未做自动感知**。当前通过环境变量 `KAIROS_HOME_LAT` / `KAIROS_HOME_LON` 指定固定坐标；若配置为空，天气注入静默跳过。一个自然的扩展方向是结合行程（赛程 / 日历 / 用户消息中的位置线索）自动推断所在城市——开源版有意保留手动配置作为最小实现，使用者可以自行替换为更智能的定位逻辑。
+- **角色状态的具体规则由使用者自行定义**。`home_state.json` 的结构和状态读取逻辑在公开版保留，但原项目中「根据日程 / 时间自动切换状态」的规则模块（`status_rule.py`）已随脱敏移除。使用者需自行维护状态文本——直接编辑 `home_state.json`，或实现自己的状态规则模块。
 - **两套用量记录机制并存**。`api_usage.record_usage`（写 `~/.kairos/api_usage.json`，服务成本控制判断）与 `loop._log_usage`（写 `backend/logs/usage.log`，用于事后分析）功能部分重叠，是历史迭代遗留。合并前需确认两套数据各自的消费方。
 - **Windows 启动脚本硬编码 Python 3.11 路径**。三个 `.bat` 使用 `%LOCALAPPDATA%\Programs\Python\Python311\python.exe`，用户装 3.12 或用非默认安装位置时会失败。改用 `py -3` launcher 是更通用的方案，但需在无 Windows CI 的环境下谨慎验证。
 
