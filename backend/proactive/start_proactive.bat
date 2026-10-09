@@ -1,4 +1,4 @@
 @echo off
-cd /d YOUR_PATH\backend\proactive
+cd /d "%~dp0"
 start "" "%LOCALAPPDATA%\Programs\Python\Python311\pythonw.exe" runner.py
 exit

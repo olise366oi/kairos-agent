@@ -1,5 +1,5 @@
 @echo off
-cd /d YOUR_PATH\wecom
+cd /d "%~dp0"
 netstat -ano | findstr ":8765" | findstr "LISTENING" >nul
 if %errorlevel%==0 (
     echo [wecom] already running on 8765, skip.
