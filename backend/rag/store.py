@@ -21,14 +21,6 @@ def get_client() -> chromadb.PersistentClient:
     return _client
 
 
-def get_or_create_collection(name: str = "memories"):
-    client = get_client()
-    existing = [c.name for c in client.list_collections()]
-    if name in existing:
-        client.delete_collection(name)
-    return client.create_collection(name=name, metadata={"hnsw:space": "cosine"})
-
-
 def query_collection(query_embedding: list[float], n_results: int = 5):
     client = get_client()
     try:
