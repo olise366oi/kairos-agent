@@ -12,8 +12,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 STATE_PATH = Path("./data/watch_state.json")
-LEAGUE_ID = 3614399544      # France Ligue 1
-HOME_TEAM_ID = 3976425434    # 主队
 HOME_TOKEN = os.environ.get("HOME_TOKEN")
 if not HOME_TOKEN:
     raise RuntimeError("HOME_TOKEN 环境变量必须设置，不能为空")
@@ -21,25 +19,28 @@ TUNGO_BASE = os.environ.get("TUNGO_BASE", "https://your-tunnel.example.com")
 LINK = f"{TUNGO_BASE}/watch?t={HOME_TOKEN}"
 
 
-def _load_api_key() -> str:
-    """读 5DollarFootballAPI Key：优先环境变量 FIVEDOLLARFOOTBALL_API_KEY，
-    未设则读同目录 .env（KEY=VALUE 行）。都没有返回空串。"""
-    key = os.environ.get("FIVEDOLLARFOOTBALL_API_KEY", "").strip()
-    if key:
-        return key
+def _load_config(key_name: str) -> str:
+    """读配置：优先环境变量，未设则读同目录 .env（KEY=VALUE 行）。都没有返回空串。"""
+    val = os.environ.get(key_name, "").strip()
+    if val:
+        return val
     try:
         env_path = Path(__file__).resolve().parent / ".env"
         if env_path.exists():
             for line in env_path.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
-                if line.startswith("FIVEDOLLARFOOTBALL_API_KEY="):
+                if line.startswith(f"{key_name}="):
                     return line.split("=", 1)[1].strip().strip('"').strip("'")
     except Exception:
         pass
     return ""
 
 
-FIVEDOLLAR_API_KEY = _load_api_key()
+FIVEDOLLAR_API_KEY = _load_config("FIVEDOLLARFOOTBALL_API_KEY")
+
+# 联赛 ID 与主队 ID 从环境变量读取（示例值请勿使用；填入自己的 5DollarFootballAPI 联赛/球队 ID）
+LEAGUE_ID = int(_load_config("FIVEDOLLAR_LEAGUE_ID") or "0")
+HOME_TEAM_ID = int(_load_config("FIVEDOLLAR_HOME_TEAM_ID") or "0")
 
 _LOCK = threading.RLock()
 
@@ -337,8 +338,8 @@ def _mcp_call(name, args):
 def fetch_recent_finished_fixture():
     """从 MCP 拉一场最近已结束的比赛（优先主队的），返回 {fixture_id, home_team, away_team, events}。
     Key 未配置时安静返回 None（companion没有比赛可看，不报错不崩溃）。"""
-    if not FIVEDOLLAR_API_KEY:
-        print("[watch] 未配置 FIVEDOLLARFOOTBALL_API_KEY，跳过看球发起", flush=True)
+    if not FIVEDOLLAR_API_KEY or not LEAGUE_ID or not HOME_TEAM_ID:
+        print("[watch] 未配置 FIVEDOLLARFOOTBALL_API_KEY / FIVEDOLLAR_LEAGUE_ID / FIVEDOLLAR_HOME_TEAM_ID，跳过看球发起", flush=True)
         return None
     data = _mcp_call("get_league_fixtures", {"league_id": LEAGUE_ID})
     results = (data or {}).get("results") or []
