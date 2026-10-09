@@ -2,8 +2,8 @@
 
 ![Tests](https://github.com/olise366oi/kairos-agent/actions/workflows/test.yml/badge.svg) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-心跳循环驱动的主动式对话 + 16 维情感状态引擎 + 双路 API 成本控制。
-12 天独立交付，7,677 行 Python + 2,163 行 JavaScript。
+心跳循环驱动的主动式对话 + 16 维情感状态引擎 + 双路 API 成本控制（DeepSeek 官方 + 火山方舟双账号）。
+12 天独立交付，7,283 行 Python + 2,163 行 JavaScript。
 
 **技术栈**：Python · FastAPI · LangChain · ChromaDB · Node.js (Express 4 + MCP SDK) · 原生 JavaScript · 企业微信 API
 
@@ -16,8 +16,8 @@
 
 ## 项目规模
 
-- **Python 7,677 行 / 46 文件**，**JavaScript 2,163 行 / 9 文件**（不含依赖与生成物）
-- 核心后端模块 **45 个**，FastAPI 路由 **52 条**（26 GET / 26 POST，home_server.py 单文件口径；含 wecom 回调服务则为 58 条）
+- **Python 7,283 行 / 42 文件**，**JavaScript 2,163 行 / 9 文件**（不含依赖与生成物）
+- 核心后端模块 **40 个**（backend 32 + wecom 8），FastAPI 路由 **43 条**（home_server.py 单文件口径；含 wecom 回调服务则为 49 条）
 - RAG 知识库 **7 类**，MCP 工具 **3 个**（情感引擎服务端）
 - 三端入口（移动 Web / 企微 / 桌面），情感引擎独立进程（REST + MCP 双协议）
 - 开发周期：2026年9月13日 – 9月24日，独立开发。
@@ -42,7 +42,7 @@
 
 主动触发意味着请求量是被动模式的数倍。系统没有切换模型，而是**在同一个 DeepSeek 模型上，通过多渠道调度来压低单次调用成本**（`backend/config.py`）：
 
-- **双路 API 池**：DeepSeek 官方 API + 火山方舟 API（同样跑 DeepSeek 模型），后者有每日免费额度
+- **双路 API 池**：DeepSeek 官方 API + 火山方舟 API（同样跑 DeepSeek 模型），后者两个账号：免费池（api2）+ 峰段池（api3）
 - **按用量自动回退**：本地累计 token 计量（`api_usage.py`），主池配额耗尽自动降级到备用池
 - **RAG 按需检索**：关键词命中才注入知识片段，日常闲聊完全不检索
 - **30 分钟天气缓存** + **思考链长度上限**：减少不必要的 token 消耗
