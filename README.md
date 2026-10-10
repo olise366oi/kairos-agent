@@ -1,6 +1,6 @@
 # Kairos — 一个会"决定不说话"的 AI 陪伴 Agent
 
-![Tests](https://github.com/olise366oi/kairos-agent/actions/workflows/test.yml/badge.svg) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Tests](https://github.com/olise366oi/kairos-agent/actions/workflows/test.yml/badge.svg) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Drivesoid: CC BY--NC--SA](https://img.shields.io/badge/Drivesoid-CC--BY--NC--SA-blue)
 
 心跳循环驱动的主动式对话 + 16 维情感状态引擎 + 双路 API 成本控制（DeepSeek 官方 + 火山方舟双账号）。
 12 天独立交付，7,283 行 Python + 2,163 行 JavaScript。开源整理（脱敏 + 测试补齐 + 工程加固）另耗 3 天。
