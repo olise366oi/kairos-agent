@@ -4,9 +4,7 @@
 
 ![Tests](https://github.com/olise366oi/kairos-agent/actions/workflows/test.yml/badge.svg) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Drivesoid: CC BY--NC--SA](https://img.shields.io/badge/Drivesoid-CC--BY--NC--SA-blue)
 
-A heartbeat loop drives proactive conversation; a 16-dimension continuous emotion engine tracks state; a dual-source API pool (DeepSeek official + Volcengine Ark, two Ark accounts) keeps cost down. Solo-built in 12 days: 7,283 lines of Python + 2,163 lines of JavaScript. Open-source cleanup (redaction, test coverage, engineering hardening) added 3 more days.
-
-**Kairos** is an AI companion agent that runs on a heartbeat loop — instead of replying to every prompt, it periodically decides whether to speak, write a diary entry, or stay silent. The system pairs a 16-dimension continuous emotion engine (independent Node.js process) with a multi-source API pool that routes each request based on peak/off-peak pricing and remaining quota. Built solo in 12 days: 7,283 lines of Python + 2,163 lines of JavaScript, delivered across web / WeChat Work / desktop with shared state.
+**Kairos** is an AI companion agent that runs on a heartbeat loop — instead of replying to every prompt, it periodically decides whether to speak, write a diary entry, or stay silent. The system pairs a 16-dimension continuous emotion engine (independent Node.js process) with a multi-source API pool that routes each request based on peak/off-peak pricing and remaining quota. Built solo in 12 days: 7,283 lines of Python + 2,163 lines of JavaScript, delivered across web / WeChat Work / desktop with shared state. Open-source cleanup (redaction, test coverage, engineering hardening) added 3 more days.
 
 **Tech Stack**: Python · FastAPI · LangChain · ChromaDB · Node.js (Express 4 + MCP SDK) · Vanilla JavaScript · WeChat Work API
 
