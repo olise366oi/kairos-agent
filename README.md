@@ -17,7 +17,7 @@
 - **Python: 7,283 lines / 42 files**, **JavaScript: 2,163 lines / 9 files** (excluding dependencies and generated artifacts)
 - **40 core backend modules** (32 in `backend/` + 8 in `wecom/`), **43 FastAPI routes** (counting `home_server.py` alone; 49 if wecom callback service is included)
 - **7 RAG knowledge domains**, **3 MCP tools** (exposed by the emotion engine)
-- Three front-ends (mobile web / WeChat Work / desktop), emotion engine as an independent process (REST + MCP dual protocol)
+- Three front-ends (mobile web / WeChat Work / desktop), emotion engine as an independent process (RESTful API + MCP tool access, dual entry points)
 - Development period: original project Sep 13 – Sep 24, 2026, solo; open-source cleanup (redaction / tests / engineering hardening) added 3 more days.
 
 ---
@@ -47,13 +47,16 @@ Proactive triggering multiplies request volume compared to passive mode. The sys
 - **30-minute weather cache** + **reasoning-chain length cap**: reduce unnecessary token consumption
 - **Usage visualization**: balance and real-time usage of all three API routes are viewable in the web UI (`/api/home/api_usage`), so users can verify the routing strategy's effects themselves
 
-**Measured data** (`backend/logs/usage.log`, 2026-09-18 → 09-27, 704 calls over 9 days): **91.8% of calls used Ark's free quota; 93.6% of tokens were consumed during off-peak hours.** Note: this distribution is also shaped by usage timing (peak-hour traffic was mostly development debugging, while chat requests were concentrated off-peak), so it is not purely an effect of the routing strategy. But the dual-source pool did absorb the extra request volume from proactive triggering without additional API spend.
+**Architectural goal**: absorb the extra request volume from proactive triggering without additional API spend — usage-based automatic fallback plus off-peak routing; when the primary pool's quota is exhausted, requests degrade seamlessly to the backup pool, transparently to the user.
+
+**Measured verification** (`backend/logs/usage.log`, 2026-09-18 → 09-27, 704 calls over 9 days): **91.8% of calls landed on Ark's free quota; 93.6% of tokens were consumed during off-peak hours.** Note: this distribution is also shaped by usage timing (peak-hour traffic was mostly development debugging, while chat requests were concentrated off-peak), so it is not purely an effect of the routing strategy — but the dual-source pool did absorb the extra request volume from proactive triggering without additional spend.
 
 ### 3. Continuous Emotion Engine (Independent Node.js Service)
 
 Rather than having the LLM "act out" emotions, the system makes emotion a **queryable state living in its own process** (`backend/drivesoid/`, port 24601):
 
 - Maintains **16 continuous dimensions** (longing / intimacy / vitality / jealousy / anxiety / contentment / elation / possessiveness, etc.), each with its own time constant, peak time, and amplitude parameters
+- **Dynamics**: fast-changing emotion (`base`) decays over minutes to hours toward slow mood (`mood`); mood regresses to a temperament anchor over days; repeated triggers within 15 minutes are habituated (×0.7 per repeat); negative dimensions decay more slowly than positive ones
 - The main chat loop periodically fetches the emotional context into the system prompt; emotional changes during chat are written back
 - Dual entry points: REST API + MCP service — callable from Python, consumable by any MCP client
 
